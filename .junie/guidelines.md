@@ -54,3 +54,37 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## SSR Considerations
+- Ensure components work with SSR
+- Use platform-specific code checks when necessary
+- Test both client and server rendering
+
+
+## Routing
+- Configure routes in `app.routes.ts`
+- Use lazy loading for feature modules
+- Implement proper route guards when needed
+
+
+### File Organization
+- Group related files by feature/page
+- Keep components small and focused
+- Separate concerns: logic (.ts), template (.html), styles (.scss)
+- Use descriptive, kebab-case file names
+
+### Design System & Style Reuse
+
+**Overview:**
+Establish a comprehensive design system to ensure consistent styling across the application and promote code reusability. All reusable styles, design tokens, and utility classes should be centralized and organized into modular files.
+
+### Styling Standards
+- Use SCSS for all styling.
+- **Organization:** Break down the design system into dedicated files inside a `styles` directory for different style configurations (e.g., `_variables.scss`, `_typography.scss`, `_buttons.scss`, `_forms.scss`, `_animations.scss`, `_utilities.scss`).
+- **Integration:** Import these modular files into the main `src/styles.scss` file using `@use 'path/to/file' as *;` to avoid cluttering a single file.
+- Component-specific styles should remain in their respective separate `.scss` files.
+- Global styles and design tokens must be managed through this modular system.
+- Follow Prettier configuration:
+  - Print width: 100 characters
+  - Single quotes
+  - Angular parser for HTML files
