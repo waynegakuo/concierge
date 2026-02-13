@@ -65,6 +65,7 @@ export const _routerAgentLogic = ai.defineFlow({
     else if (intent === 'weekend_guide_agent') {
       const weekendGuideResponse = await ai.generate({
         prompt: WEEKEND_GUIDE_AGENT_PROMPT,
+        output: {schema: z.string()}
       });
       return weekendGuideResponse.output;
     }
