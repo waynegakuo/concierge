@@ -91,7 +91,7 @@ export const routerAgentFlow = onCallGenkit(
       : [
         'http://localhost:4200',
         'http://localhost:5001',
-        /^https:\/\/agent-concierge(--[a-z0-9-]+)?\.web\.app$/, // Matches live site (agent-concierge.web.app) and previews (agent-concierge--<channel>.web.app)
+        /^https:\/\/agents-concierge(--[a-z0-9-]+)?\.web\.app$/, // Matches live site (agents-concierge.web.app) and previews (agents-concierge--<channel>.web.app)
       ],
   },
   _routerAgentLogic
