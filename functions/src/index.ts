@@ -42,7 +42,7 @@ export const _routerAgentLogic = ai.defineFlow({
 
   async ({query}) => {
     const intentResponse = await ai.generate({
-      prompt: ROUTER_AGENT_PROMPT,
+      prompt: `${ROUTER_AGENT_PROMPT}\n\nUser query: ${query}`,
       output: {schema: z.string()}
     });
 
