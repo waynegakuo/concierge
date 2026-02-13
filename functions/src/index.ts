@@ -31,7 +31,7 @@ const ai = genkit({
   plugins: [
     googleAI({ apiKey: process.env.GEMINI_API_KEY }),
   ],
-  model: googleAI.model('gemini-3-flash-preview'), // Using a stable model name
+  model: googleAI.model('gemini-2.5-flash'), // Using a stable model name
 });
 
 export const _routerAgentLogic = ai.defineFlow({
