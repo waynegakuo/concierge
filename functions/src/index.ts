@@ -46,8 +46,6 @@ const GENKIT_FUNCTION_CONFIG = {
     ],
 };
 
-
-
 export const _dayTripAgentFlowLogic = ai.defineTool(
   {
     name: 'dayTripAgentFlow',
@@ -69,11 +67,6 @@ export const _dayTripAgentFlowLogic = ai.defineTool(
 
     return response.output;
   }
-);
-
-export const dayTripAgentFlow = onCallGenkit(
-  GENKIT_FUNCTION_CONFIG,
-  _dayTripAgentFlowLogic
 );
 
 export const _foodieAgentFlowLogic = ai.defineTool(
@@ -99,11 +92,6 @@ export const _foodieAgentFlowLogic = ai.defineTool(
   }
 );
 
-export const foodieAgentFlow = onCallGenkit(
-  GENKIT_FUNCTION_CONFIG,
-  _foodieAgentFlowLogic
-);
-
 export const _weekendGuideAgentFlowLogic = ai.defineTool(
   {
     name: 'weekendGuideAgentFlow',
@@ -127,11 +115,6 @@ export const _weekendGuideAgentFlowLogic = ai.defineTool(
   }
 );
 
-export const weekendGuideAgentFlow = onCallGenkit(
-  GENKIT_FUNCTION_CONFIG,
-  _weekendGuideAgentFlowLogic
-);
-
 export const _findAndNavigateAgentFlowLogic = ai.defineTool(
   {
     name: 'findAndNavigateAgentFlow',
@@ -153,11 +136,6 @@ export const _findAndNavigateAgentFlowLogic = ai.defineTool(
 
     return response.text;
   }
-);
-
-export const findAndNavigateAgentFlow = onCallGenkit(
-  GENKIT_FUNCTION_CONFIG,
-  _findAndNavigateAgentFlowLogic
 );
 
 export const _conciergeAgentLogic = ai.defineFlow(
