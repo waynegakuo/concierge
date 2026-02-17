@@ -47,6 +47,7 @@ const GENKIT_FUNCTION_CONFIG = {
 };
 
 
+
 export const _dayTripAgentFlowLogic = ai.defineTool(
   {
     name: 'dayTripAgentFlow',
@@ -57,7 +58,9 @@ export const _dayTripAgentFlowLogic = ai.defineTool(
   async ({input}) => {
     const response = await ai.generate({
       prompt: `${DAY_TRIP_AGENT_PROMPT}\n\nUser query: ${input}`,
-      output: {schema: z.string()}
+      config: {
+        googleSearchRetrieval: {}
+      }
     });
 
     if (!response.output) {
@@ -83,14 +86,16 @@ export const _foodieAgentFlowLogic = ai.defineTool(
   async ({input}) => {
     const response = await ai.generate({
       prompt: `${FOODIE_AGENT_PROMPT}\n\nUser query: ${input}`,
-      output: {schema: z.string()}
+      config: {
+        googleSearchRetrieval: {}
+      }
     });
 
-    if (!response.output) {
+    if (!response.text) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return response.text;
   }
 );
 
@@ -109,14 +114,16 @@ export const _weekendGuideAgentFlowLogic = ai.defineTool(
   async ({input}) => {
     const response = await ai.generate({
       prompt: `${WEEKEND_GUIDE_AGENT_PROMPT}\n\nUser query: ${input}`,
-      output: {schema: z.string()}
+      config: {
+        googleSearchRetrieval: {}
+      }
     });
 
-    if (!response.output) {
+    if (!response.text) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return response.text;
   }
 );
 
@@ -135,14 +142,16 @@ export const _findAndNavigateAgentFlowLogic = ai.defineTool(
   async ({input}) => {
     const response = await ai.generate({
       prompt: `${TRANSPORT_AGENT_PROMPT}\n\nUser query: ${input}`,
-      output: {schema: z.string()}
-      });
+      config: {
+        googleSearchRetrieval: {}
+      }
+    });
 
-    if (!response.output) {
+    if (!response.text) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return response.text;
   }
 );
 
@@ -178,70 +187,5 @@ export const conciergeAgentFlow = onCallGenkit(
   GENKIT_FUNCTION_CONFIG,
   _conciergeAgentLogic
 );
-
-// Commented out - replaced by conciergeAgentFlow
-// export const _routerAgentLogic = ai.defineFlow(
-//   {
-//     name: 'routerAgentFlow',
-//     inputSchema: z.object({query: z.string()}),
-//     outputSchema: z.string()
-//   },
-//   async ({query}) => {
-//     const intentResponse = await ai.generate({
-//       prompt: `${ROUTER_AGENT_PROMPT}\n\nUser query: ${query}`,
-//       output: {schema: z.string()}
-//     });
-//
-//     const intent = intentResponse.output;
-//
-//     if (intent === 'day_trip_agent') {
-//       const dayTripResponse = await ai.generate({
-//         prompt: DAY_TRIP_AGENT_PROMPT,
-//       });
-//       return dayTripResponse.output;
-//     }
-//
-//     else if (intent === 'foodie_agent') {
-//       const foodieResponse = await ai.generate({
-//         prompt: FOODIE_AGENT_PROMPT,
-//       });
-//       return foodieResponse.output;
-//     }
-//
-//     else if (intent === 'weekend_guide_agent') {
-//       const weekendGuideResponse = await ai.generate({
-//         prompt: WEEKEND_GUIDE_AGENT_PROMPT,
-//         output: {schema: z.string()}
-//       });
-//       return weekendGuideResponse.output;
-//     }
-//
-//     else if (intent === 'find_and_navigate_combo') {
-//       const findAndNavigateResponse = await ai.generate({
-//         prompt: TRANSPORT_AGENT_PROMPT
-//       });
-//       return findAndNavigateResponse.output;
-//     }
-//
-//     else {
-//       return 'Sorry, I could not determine how to handle your request';
-//     }
-//   }
-// );
-//
-// export const routerAgentFlow = onCallGenkit(
-//   {
-//     secrets: [GEMINI_API_KEY],
-//     region: 'africa-south1',
-//     cors: isEmulated
-//       ? true
-//       : [
-//         'http://localhost:4200',
-//         'http://localhost:5001',
-//         /^https:\/\/agents-concierge(--[a-z0-9-]+)?\.web\.app$/, // Matches live site (agents-concierge.web.app) and previews (agents-concierge--<channel>.web.app)
-//       ],
-//   },
-//   _routerAgentLogic
-// )
 
 
