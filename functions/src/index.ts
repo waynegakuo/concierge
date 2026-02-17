@@ -160,15 +160,17 @@ export const _conciergeAgentLogic = ai.defineFlow(
   async ({input}) => {
     const response = await ai.generate({
       prompt: `${CONCIERGE_AGENT_PROMPT}\n\nUser query: ${input}`,
-      tools: [_dayTripAgentFlowLogic, _foodieAgentFlowLogic, _weekendGuideAgentFlowLogic],
-      output: {schema: z.string()}
+      tools: [_dayTripAgentFlowLogic, _foodieAgentFlowLogic, _weekendGuideAgentFlowLogic, _findAndNavigateAgentFlowLogic]
     });
 
-    if (!response.output) {
+    // When tools are used, the response may not have output but will have text
+    const result = response.text || response.output;
+
+    if (!result) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return result;
   }
 );
 
