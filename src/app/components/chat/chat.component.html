@@ -1,0 +1,35 @@
+<div class="chat-container">
+  <header>
+    <h1>Agent Concierge</h1>
+  </header>
+
+  <main class="message-list" role="log" aria-live="polite">
+    @for (message of messages(); track message.timestamp) {
+      <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
+        <div class="message-content">
+          {{ message.text }}
+        </div>
+      </div>
+    }
+    @if (isLoading()) {
+      <div class="message ai-message loading">
+        <div class="message-content">Thinking...</div>
+      </div>
+    }
+  </main>
+
+  <footer>
+    <form (submit)="sendMessage(); $event.preventDefault()" class="input-area">
+      <input
+        type="text"
+        [formControl]="queryControl"
+        placeholder="Type your request here..."
+        class="form-control"
+        aria-label="Chat message"
+      />
+      <button type="submit" class="btn btn-primary" [disabled]="queryControl.invalid || isLoading()">
+        Send
+      </button>
+    </form>
+  </footer>
+</div>
