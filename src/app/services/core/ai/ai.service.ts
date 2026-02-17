@@ -10,7 +10,7 @@ export class AiService {
   private readonly functions = inject(Functions);
 
   sendMessage(query: string): Observable<{ data: string }> {
-    const routerAgentFlow = httpsCallable<{ query: string }, string>(this.functions, 'routerAgentFlow');
-    return from(routerAgentFlow({ query }));
+    const conciergeAgentFlow = httpsCallable<{ input: string }, string>(this.functions, 'conciergeAgentFlow');
+    return from(conciergeAgentFlow({ input: query }));
   }
 }
