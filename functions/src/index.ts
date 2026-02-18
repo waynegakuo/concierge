@@ -61,11 +61,11 @@ export const _dayTripAgentFlowLogic = ai.defineTool(
       }
     });
 
-    if (!response.output) {
+    if (!response.text) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return response.text;
   }
 );
 
