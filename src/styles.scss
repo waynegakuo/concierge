@@ -1,4 +1,58 @@
-@use 'styles/variables' as *;
+// ============================================
+// DESIGN SYSTEM IMPORTS
+// ============================================
 
-html, body { height: 100%; }
-body { margin: 0; }
+@use 'styles/variables' as *;
+@use 'styles/typography' as *;
+@use 'styles/animations' as *;
+@use 'styles/buttons' as *;
+@use 'styles/forms' as *;
+@use 'styles/utilities' as *;
+
+// ============================================
+// GLOBAL STYLES
+// ============================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: $bg-primary;
+  overflow-x: hidden;
+}
+
+// ============================================
+// SMOOTH SCROLLING
+// ============================================
+
+html {
+  scroll-behavior: smooth;
+}
+
+// ============================================
+// FOCUS VISIBLE
+// ============================================
+
+:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+}
+
+// ============================================
+// SELECTION
+// ============================================
+
+::selection {
+  background-color: rgba($primary, 0.2);
+  color: $gray-900;
+}

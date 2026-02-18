@@ -1,102 +1,126 @@
 @use 'sass:color';
 
-$primary: #007bff;
-$secondary: #6c757d;
-$success: #28a745;
-$danger: #dc3545;
-$warning: #ffc107;
-$info: #17a2b8;
-$light: #f8f9fa;
-$dark: #343a40;
+// ============================================
+// COLOR PALETTE - Modern & Beautiful
+// ============================================
 
-$white: #fff;
-$black: #000;
+// Primary Colors - Vibrant Purple/Indigo
+$primary: #6366f1;
+$primary-light: #818cf8;
+$primary-dark: #4f46e5;
+$primary-darker: #4338ca;
 
-$gray-100: #f8f9fa;
-$gray-200: #e9ecef;
-$gray-300: #dee2e6;
-$gray-400: #ced4da;
-$gray-500: #adb5bd;
-$gray-600: #6c757d;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #212529;
+// Secondary Colors - Warm Coral/Pink
+$secondary: #ec4899;
+$secondary-light: #f472b6;
+$secondary-dark: #db2777;
 
-$border-radius: 0.25rem;
-$border-color: $gray-300;
+// Accent Colors
+$accent-teal: #14b8a6;
+$accent-amber: #f59e0b;
+$accent-emerald: #10b981;
+$accent-rose: #f43f5e;
 
-$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+// Semantic Colors
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+$info: #3b82f6;
 
-body {
-  font-family: $font-family-sans-serif;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
-  color: $gray-900;
-  background-color: $white;
-}
+// Neutral Colors - Warm Grays
+$white: #ffffff;
+$black: #000000;
 
-h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
+$gray-50: #fafafa;
+$gray-100: #f5f5f5;
+$gray-200: #e5e5e5;
+$gray-300: #d4d4d4;
+$gray-400: #a3a3a3;
+$gray-500: #737373;
+$gray-600: #525252;
+$gray-700: #404040;
+$gray-800: #262626;
+$gray-900: #171717;
 
-.btn {
-  display: inline-block;
-  font-weight: 400;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  user-select: none;
-  background-color: transparent;
-  border: 1px solid transparent;
-  padding: 0.375rem 0.75rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  border-radius: $border-radius;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+// Background Colors
+$bg-primary: #fafafa;
+$bg-secondary: #ffffff;
+$bg-chat: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$bg-user-message: linear-gradient(135deg, $primary 0%, $primary-darker 100%);
+$bg-ai-message: $white;
 
-  &:focus {
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
-  }
+// Border & Shadow
+$border-radius-sm: 0.5rem;
+$border-radius: 1rem;
+$border-radius-lg: 1.5rem;
+$border-radius-xl: 2rem;
+$border-color: $gray-200;
 
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-}
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-.btn-primary {
-  color: $white;
-  background-color: $primary;
-  border-color: $primary;
+// ============================================
+// TYPOGRAPHY
+// ============================================
 
-  &:hover {
-    background-color: color.adjust($primary, $lightness: -7.5%);
-    border-color: color.adjust($primary, $lightness: -10%);
-  }
-}
+$font-family-display: 'Architects Daughter', cursive;
+$font-family-sans: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  'Helvetica Neue', Arial, sans-serif;
+$font-family-base: $font-family-sans;
 
-.form-control {
-  display: block;
-  width: 100%;
-  padding: 0.375rem 0.75rem;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
-  color: $gray-700;
-  background-color: $white;
-  background-clip: padding-box;
-  border: 1px solid $gray-400;
-  border-radius: $border-radius;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+// Font Sizes
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+$font-size-3xl: 1.875rem;
+$font-size-4xl: 2.25rem;
 
-  &:focus {
-    color: $gray-700;
-    background-color: $white;
-    border-color: color.adjust($primary, $lightness: 25%);
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
-  }
-}
+// Font Weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ============================================
+// SPACING
+// ============================================
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+
+// ============================================
+// TRANSITIONS
+// ============================================
+
+$transition-fast: 150ms ease-in-out;
+$transition-base: 250ms ease-in-out;
+$transition-slow: 350ms ease-in-out;
+
+// ============================================
+// Z-INDEX
+// ============================================
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;

@@ -1,19 +1,40 @@
 <div class="chat-container">
   <header>
-    <h1>Agent Concierge</h1>
+    <div class="branding">
+      <span>🎩</span><h1>Agent Concierge</h1>
+    </div>
   </header>
 
   <main class="message-list" role="log" aria-live="polite">
     @for (message of messages(); track message.timestamp) {
-      <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
-        <div class="message-content">
-          {{ message.text }}
+      <div class="message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
+        @if (message.sender === 'ai') {
+          <div class="message-avatar ai-avatar">
+            <span>🎩</span>
+          </div>
+        }
+        <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
+          <div class="message-content">
+            <span class="message-text">{{ message.text }}</span>
+          </div>
         </div>
+        @if (message.sender === 'user') {
+          <div class="message-avatar user-avatar">
+            <span>👤</span>
+          </div>
+        }
       </div>
     }
     @if (isLoading()) {
-      <div class="message ai-message loading">
-        <div class="message-content">Thinking...</div>
+      <div class="message-wrapper ai-wrapper">
+        <div class="message-avatar ai-avatar">
+          <span>🎩</span>
+        </div>
+        <div class="message ai-message loading">
+          <div class="message-content">
+            <span class="message-text">Thinking</span>
+          </div>
+        </div>
       </div>
     }
   </main>
@@ -23,12 +44,18 @@
       <input
         type="text"
         [formControl]="queryControl"
-        placeholder="Type your request here..."
+        placeholder="💬 Type your request here..."
         class="form-control"
         aria-label="Chat message"
       />
       <button type="submit" class="btn btn-primary" [disabled]="queryControl.invalid || isLoading()">
-        Send
+        <span class="button-content">
+          @if (isLoading()) {
+            <span>⏳</span>
+          } @else {
+            <span>🚀 Send</span>
+          }
+        </span>
       </button>
     </form>
   </footer>
