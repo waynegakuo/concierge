@@ -2,9 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AiService } from '../../services/core/ai/ai.service';
 import { finalize } from 'rxjs';
+import {MarkdownUtils} from '../../utils/markdown-utils';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 interface Message {
   text: string;
+  formattedText?: SafeHtml;
   sender: 'user' | 'ai';
   timestamp: Date;
 }
@@ -18,6 +21,7 @@ interface Message {
 })
 export class ChatComponent {
   private readonly aiService = inject(AiService);
+  private sanitizer = inject(DomSanitizer);
 
   messages = signal<Message[]>([]);
   isLoading = signal(false);
@@ -46,16 +50,22 @@ export class ChatComponent {
         next: (response) => {
           this.messages.update((msgs) => [
             ...msgs,
-            { text: response.data, sender: 'ai', timestamp: new Date() },
+            { text: response.data, formattedText: this.formatMarkdown(response.data), sender: 'ai', timestamp: new Date() },
           ]);
         },
         error: (err) => {
           console.error('Error sending message:', err);
+          const errorText= 'Sorry, something went wrong. Please try again.'
           this.messages.update((msgs) => [
             ...msgs,
-            { text: 'Sorry, something went wrong. Please try again.', sender: 'ai', timestamp: new Date() },
+            { text: errorText, formattedText: this.formatMarkdown(errorText), sender: 'ai', timestamp: new Date() },
           ]);
         },
       });
+  }
+
+  private formatMarkdown(text: string): SafeHtml {
+    const html = MarkdownUtils.formatMarkdown(text);
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

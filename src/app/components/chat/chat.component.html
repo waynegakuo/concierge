@@ -15,7 +15,11 @@
         }
         <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
           <div class="message-content">
-            <span class="message-text">{{ message.text }}</span>
+            @if (message.formattedText) {
+              <div [innerHTML]="message.formattedText"></div>
+            } @else {
+              <span class="message-text">{{ message.text }}</span>
+            }
           </div>
         </div>
         @if (message.sender === 'user') {
