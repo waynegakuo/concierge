@@ -41,6 +41,19 @@
       background-clip: text;
       letter-spacing: 0.5px;
     }
+
+    .instructions {
+      font-size: $font-size-sm;
+      color: $gray-700;
+      line-height: 1.5;
+      max-width: 600px;
+      margin: $spacing-md auto 0;
+
+      strong {
+        color: $gray-900;
+        font-weight: 600;
+      }
+    }
   }
 
   .message-list {
