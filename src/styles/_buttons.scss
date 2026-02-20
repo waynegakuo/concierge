@@ -1,0 +1,308 @@
+@use 'sass:color';
+@use 'variables' as *;
+
+// ============================================
+// BASE BUTTON STYLES
+// ============================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  font-family: $font-family-base;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid transparent;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  border-radius: $border-radius;
+  transition: all $transition-base;
+  box-shadow: $shadow-sm;
+
+  &:focus {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba($primary, 0.2);
+  }
+
+  &:disabled,
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:hover:not(:disabled):not(.disabled) {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  &:active:not(:disabled):not(.disabled) {
+    transform: translateY(0);
+    box-shadow: $shadow-sm;
+  }
+}
+
+// ============================================
+// BUTTON VARIANTS
+// ============================================
+
+// Primary Button
+.btn-primary {
+  color: $white;
+  background: $bg-user-message;
+  border-color: transparent;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background: linear-gradient(135deg, $primary-light 0%, $primary 100%);
+    box-shadow: 0 8px 16px -4px rgba($primary, 0.4);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.3);
+  }
+
+  &:active:not(:disabled):not(.disabled) {
+    background: linear-gradient(135deg, $primary-dark 0%, $primary-darker 100%);
+  }
+}
+
+// Secondary Button
+.btn-secondary {
+  color: $white;
+  background: linear-gradient(135deg, $secondary 0%, $secondary-dark 100%);
+  border-color: transparent;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background: linear-gradient(135deg, $secondary-light 0%, $secondary 100%);
+    box-shadow: 0 8px 16px -4px rgba($secondary, 0.4);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($secondary, 0.3);
+  }
+}
+
+// Outline Button
+.btn-outline {
+  color: $primary;
+  background-color: transparent;
+  border-color: $primary;
+  box-shadow: none;
+
+  &:hover:not(:disabled):not(.disabled) {
+    color: $white;
+    background-color: $primary;
+    border-color: $primary;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.2);
+  }
+}
+
+// Ghost Button
+.btn-ghost {
+  color: $gray-700;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+
+  &:hover:not(:disabled):not(.disabled) {
+    color: $primary;
+    background-color: rgba($primary, 0.1);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+  }
+}
+
+// Success Button
+.btn-success {
+  color: $white;
+  background-color: $success;
+  border-color: $success;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: color.adjust($success, $lightness: -10%);
+    box-shadow: 0 8px 16px -4px rgba($success, 0.4);
+  }
+}
+
+// Danger Button
+.btn-danger {
+  color: $white;
+  background-color: $danger;
+  border-color: $danger;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: color.adjust($danger, $lightness: -10%);
+    box-shadow: 0 8px 16px -4px rgba($danger, 0.4);
+  }
+}
+
+// Warning Button
+.btn-warning {
+  color: $gray-900;
+  background-color: $warning;
+  border-color: $warning;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: color.adjust($warning, $lightness: -10%);
+    box-shadow: 0 8px 16px -4px rgba($warning, 0.4);
+  }
+}
+
+// Info Button
+.btn-info {
+  color: $white;
+  background-color: $info;
+  border-color: $info;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: color.adjust($info, $lightness: -10%);
+    box-shadow: 0 8px 16px -4px rgba($info, 0.4);
+  }
+}
+
+// Light Button
+.btn-light {
+  color: $gray-900;
+  background-color: $white;
+  border-color: $gray-200;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: $gray-50;
+    border-color: $gray-300;
+  }
+}
+
+// Dark Button
+.btn-dark {
+  color: $white;
+  background-color: $gray-900;
+  border-color: $gray-900;
+
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: $gray-800;
+    box-shadow: 0 8px 16px -4px rgba($gray-900, 0.4);
+  }
+}
+
+// ============================================
+// BUTTON SIZES
+// ============================================
+
+.btn-xs {
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-xs;
+  border-radius: $border-radius-sm;
+}
+
+.btn-sm {
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-size-sm;
+  border-radius: $border-radius-sm;
+}
+
+.btn-lg {
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-lg;
+  border-radius: $border-radius-lg;
+}
+
+.btn-xl {
+  padding: $spacing-lg $spacing-2xl;
+  font-size: $font-size-xl;
+  border-radius: $border-radius-lg;
+}
+
+// ============================================
+// BUTTON MODIFIERS
+// ============================================
+
+// Block Button
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+// Icon Button
+.btn-icon {
+  padding: $spacing-sm;
+  aspect-ratio: 1;
+
+  &.btn-sm {
+    padding: $spacing-xs;
+  }
+
+  &.btn-lg {
+    padding: $spacing-md;
+  }
+}
+
+// Rounded Button
+.btn-rounded {
+  border-radius: 9999px;
+}
+
+// Button with Loading State
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    color: inherit;
+  }
+}
+
+// ============================================
+// BUTTON GROUPS
+// ============================================
+
+.btn-group {
+  display: inline-flex;
+  gap: $spacing-sm;
+
+  &.btn-group-attached {
+    gap: 0;
+
+    .btn {
+      border-radius: 0;
+
+      &:first-child {
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+      }
+
+      &:last-child {
+        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+      }
+
+      &:not(:last-child) {
+        border-right-width: 1px;
+      }
+    }
+  }
+}

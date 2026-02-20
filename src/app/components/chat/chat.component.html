@@ -1,19 +1,71 @@
 <div class="chat-container">
   <header>
-    <h1>Agent Concierge</h1>
+    <div class="header-content">
+      <div class="branding">
+        <img src="/assets/logos/agents_concierge_logo.svg" alt="Agents Concierge" />
+      </div>
+      <p class="instructions">
+        Ask me about <strong>day trips</strong>, <strong>restaurants</strong>, <strong>weekend events</strong>, or <strong>transportation routes</strong>. I'll connect you with the right specialist!
+      </p>
+    </div>
   </header>
 
-  <main class="message-list" role="log" aria-live="polite">
-    @for (message of messages(); track message.timestamp) {
-      <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
-        <div class="message-content">
-          {{ message.text }}
+  <main #messageList class="message-list" role="log" aria-live="polite">
+    @if (messages().length === 0 && !isLoading()) {
+      <div class="welcome-message">
+        <div class="avatar avatar-lg avatar-welcome welcome-avatar">
+          <span>🎩</span>
+        </div>
+        <div class="welcome-content">
+          <h2 class="gradient-text">{{ welcomeTitle }}</h2>
+          <p>{{ welcomeDescription }}</p>
+          <ul class="capabilities-list">
+            @for (capability of welcomeCapabilities; track capability.icon) {
+              <li class="card card-hover-slide">
+                <span class="capability-icon">{{ capability.icon }}</span>
+                <div class="capability-text">
+                  <strong>{{ capability.title }}</strong> {{ capability.description }}
+                </div>
+              </li>
+            }
+          </ul>
+          <p class="welcome-footer">{{ welcomeFooter }}</p>
         </div>
       </div>
     }
+    @for (message of messages(); track message.timestamp) {
+      <div class="message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
+        @if (message.sender === 'ai') {
+          <div class="avatar avatar-md avatar-ai">
+            <span>🎩</span>
+          </div>
+        }
+        <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
+          <div class="message-content">
+            @if (message.formattedText) {
+              <div [innerHTML]="message.formattedText"></div>
+            } @else {
+              <span class="message-text">{{ message.text }}</span>
+            }
+          </div>
+        </div>
+        @if (message.sender === 'user') {
+          <div class="avatar avatar-md avatar-user">
+            <span>👤</span>
+          </div>
+        }
+      </div>
+    }
     @if (isLoading()) {
-      <div class="message ai-message loading">
-        <div class="message-content">Thinking...</div>
+      <div class="message-wrapper ai-wrapper">
+        <div class="avatar avatar-md avatar-ai">
+          <span>🎩</span>
+        </div>
+        <div class="message ai-message loading">
+          <div class="message-content">
+            <span class="message-text">Thinking</span>
+          </div>
+        </div>
       </div>
     }
   </main>
@@ -23,12 +75,18 @@
       <input
         type="text"
         [formControl]="queryControl"
-        placeholder="Type your request here..."
+        placeholder="💬 Type your request here..."
         class="form-control"
         aria-label="Chat message"
       />
       <button type="submit" class="btn btn-primary" [disabled]="queryControl.invalid || isLoading()">
-        Send
+        <span class="button-content">
+          @if (isLoading()) {
+            <span>⏳</span>
+          } @else {
+            <span>🚀 Send</span>
+          }
+        </span>
       </button>
     </form>
   </footer>

@@ -1,0 +1,198 @@
+@use 'variables' as *;
+
+// ============================================
+// FONT IMPORTS
+// ============================================
+
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&display=swap');
+
+// ============================================
+// BASE TYPOGRAPHY
+// ============================================
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  color: $gray-900;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ============================================
+// HEADINGS
+// ============================================
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: $spacing-md;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $gray-900;
+}
+
+h1 {
+  font-size: $font-size-4xl;
+  font-family: $font-family-display;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  font-family: $font-family-display;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+}
+
+h4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+}
+
+h5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+}
+
+h6 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+}
+
+// ============================================
+// TEXT UTILITIES
+// ============================================
+
+.text-display {
+  font-family: $font-family-display;
+}
+
+.text-sans {
+  font-family: $font-family-sans;
+}
+
+// Font Sizes
+.text-xs {
+  font-size: $font-size-xs;
+}
+.text-sm {
+  font-size: $font-size-sm;
+}
+.text-base {
+  font-size: $font-size-base;
+}
+.text-lg {
+  font-size: $font-size-lg;
+}
+.text-xl {
+  font-size: $font-size-xl;
+}
+.text-2xl {
+  font-size: $font-size-2xl;
+}
+.text-3xl {
+  font-size: $font-size-3xl;
+}
+.text-4xl {
+  font-size: $font-size-4xl;
+}
+
+// Font Weights
+.font-light {
+  font-weight: $font-weight-light;
+}
+.font-normal {
+  font-weight: $font-weight-normal;
+}
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+// Line Heights
+.leading-tight {
+  line-height: $line-height-tight;
+}
+.leading-normal {
+  line-height: $line-height-normal;
+}
+.leading-relaxed {
+  line-height: $line-height-relaxed;
+}
+
+// Text Colors
+.text-primary {
+  color: $primary;
+}
+.text-secondary {
+  color: $secondary;
+}
+.text-gray-500 {
+  color: $gray-500;
+}
+.text-gray-600 {
+  color: $gray-600;
+}
+.text-gray-700 {
+  color: $gray-700;
+}
+.text-gray-900 {
+  color: $gray-900;
+}
+
+// Text Alignment
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+// Text Transform
+.uppercase {
+  text-transform: uppercase;
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+
+// Text Decoration
+.underline {
+  text-decoration: underline;
+}
+.no-underline {
+  text-decoration: none;
+}
+
+// Letter Spacing
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+.tracking-normal {
+  letter-spacing: 0;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
