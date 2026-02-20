@@ -1,7 +1,7 @@
 <div class="chat-container">
   <header>
     <div class="branding">
-      <span>🎩</span><h1>Agent Concierge</h1>
+      <img src="/assets/logos/agents_concierge_logo.svg" alt="Agents Concierge" />
     </div>
     <p class="instructions">
       Ask me about <strong>day trips</strong>, <strong>restaurants</strong>, <strong>weekend events</strong>, or <strong>transportation routes</strong>. I'll connect you with the right specialist!
@@ -9,6 +9,28 @@
   </header>
 
   <main class="message-list" role="log" aria-live="polite">
+    @if (messages().length === 0 && !isLoading()) {
+      <div class="welcome-message">
+        <div class="welcome-avatar">
+          <span>🎩</span>
+        </div>
+        <div class="welcome-content">
+          <h2>{{ welcomeTitle }}</h2>
+          <p>{{ welcomeDescription }}</p>
+          <ul class="capabilities-list">
+            @for (capability of welcomeCapabilities; track capability.icon) {
+              <li>
+                <span class="capability-icon">{{ capability.icon }}</span>
+                <div class="capability-text">
+                  <strong>{{ capability.title }}</strong> {{ capability.description }}
+                </div>
+              </li>
+            }
+          </ul>
+          <p class="welcome-footer">{{ welcomeFooter }}</p>
+        </div>
+      </div>
+    }
     @for (message of messages(); track message.timestamp) {
       <div class="message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
         @if (message.sender === 'ai') {

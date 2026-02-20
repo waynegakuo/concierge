@@ -12,6 +12,12 @@ interface Message {
   timestamp: Date;
 }
 
+interface WelcomeCapability {
+  icon: string;
+  title: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -29,6 +35,33 @@ export class ChatComponent {
     nonNullable: true,
     validators: [Validators.required],
   });
+
+  // Welcome message content
+  readonly welcomeTitle = "Welcome! I'm your Concierge AI Assistant";
+  readonly welcomeDescription = "I can help you with a variety of things to make your planning easier! Here's a quick rundown of what I can do:";
+  readonly welcomeFooter = "Just let me know what you need help with!";
+  readonly welcomeCapabilities: WelcomeCapability[] = [
+    {
+      icon: '🗺️',
+      title: 'Plan Day Trips:',
+      description: 'I can assist you in planning exciting day trips.'
+    },
+    {
+      icon: '🍽️',
+      title: 'Find Restaurants:',
+      description: 'Looking for the best places to eat? I can help you find restaurants based on your preferences.'
+    },
+    {
+      icon: '🎉',
+      title: 'Discover Weekend Activities:',
+      description: "If you're wondering what to do on a specific weekend, I can help you find interesting events, concerts, festivals, and other activities."
+    },
+    {
+      icon: '🚗',
+      title: 'Navigate and Find Routes:',
+      description: 'I can assist you with finding the best routes and transportation options to get you where you need to go.'
+    }
+  ];
 
   sendMessage(): void {
     const query = this.queryControl.value.trim();
