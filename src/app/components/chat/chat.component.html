@@ -8,7 +8,7 @@
     </p>
   </header>
 
-  <main class="message-list" role="log" aria-live="polite">
+  <main #messageList class="message-list" role="log" aria-live="polite">
     @if (messages().length === 0 && !isLoading()) {
       <div class="welcome-message">
         <div class="welcome-avatar">

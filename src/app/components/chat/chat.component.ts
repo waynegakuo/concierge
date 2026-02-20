@@ -1,9 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  AfterViewChecked,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AiService } from '../../services/core/ai/ai.service';
 import { finalize } from 'rxjs';
-import {MarkdownUtils} from '../../utils/markdown-utils';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import { MarkdownUtils } from '../../utils/markdown-utils';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface Message {
   text: string;
@@ -25,9 +33,12 @@ interface WelcomeCapability {
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatComponent {
+export class ChatComponent implements AfterViewChecked {
   private readonly aiService = inject(AiService);
   private sanitizer = inject(DomSanitizer);
+
+  @ViewChild('messageList') private messageList?: ElementRef<HTMLElement>;
+  private shouldScrollToBottom = false;
 
   messages = signal<Message[]>([]);
   isLoading = signal(false);
@@ -63,6 +74,13 @@ export class ChatComponent {
     }
   ];
 
+  ngAfterViewChecked(): void {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
+    }
+  }
+
   sendMessage(): void {
     const query = this.queryControl.value.trim();
     if (!query || this.isLoading()) return;
@@ -75,26 +93,53 @@ export class ChatComponent {
 
     this.queryControl.reset();
     this.isLoading.set(true);
+    this.shouldScrollToBottom = true;
 
     this.aiService
       .sendMessage(query)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+          this.shouldScrollToBottom = true;
+        })
+      )
       .subscribe({
         next: (response) => {
           this.messages.update((msgs) => [
             ...msgs,
-            { text: response.data, formattedText: this.formatMarkdown(response.data), sender: 'ai', timestamp: new Date() },
+            {
+              text: response.data,
+              formattedText: this.formatMarkdown(response.data),
+              sender: 'ai',
+              timestamp: new Date(),
+            },
           ]);
+          this.shouldScrollToBottom = true;
         },
         error: (err) => {
           console.error('Error sending message:', err);
-          const errorText= 'Sorry, something went wrong. Please try again.'
+          const errorText = 'Sorry, something went wrong. Please try again.';
           this.messages.update((msgs) => [
             ...msgs,
-            { text: errorText, formattedText: this.formatMarkdown(errorText), sender: 'ai', timestamp: new Date() },
+            {
+              text: errorText,
+              formattedText: this.formatMarkdown(errorText),
+              sender: 'ai',
+              timestamp: new Date(),
+            },
           ]);
+          this.shouldScrollToBottom = true;
         },
       });
+  }
+
+  private scrollToBottom(): void {
+    if (this.messageList?.nativeElement) {
+      this.messageList.nativeElement.scrollTo({
+        top: this.messageList.nativeElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }
 
   private formatMarkdown(text: string): SafeHtml {
