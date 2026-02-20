@@ -11,15 +11,15 @@
   <main #messageList class="message-list" role="log" aria-live="polite">
     @if (messages().length === 0 && !isLoading()) {
       <div class="welcome-message">
-        <div class="welcome-avatar">
+        <div class="avatar avatar-lg avatar-welcome welcome-avatar">
           <span>🎩</span>
         </div>
         <div class="welcome-content">
-          <h2>{{ welcomeTitle }}</h2>
+          <h2 class="gradient-text">{{ welcomeTitle }}</h2>
           <p>{{ welcomeDescription }}</p>
           <ul class="capabilities-list">
             @for (capability of welcomeCapabilities; track capability.icon) {
-              <li>
+              <li class="card card-hover-slide">
                 <span class="capability-icon">{{ capability.icon }}</span>
                 <div class="capability-text">
                   <strong>{{ capability.title }}</strong> {{ capability.description }}
@@ -34,7 +34,7 @@
     @for (message of messages(); track message.timestamp) {
       <div class="message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
         @if (message.sender === 'ai') {
-          <div class="message-avatar ai-avatar">
+          <div class="avatar avatar-md avatar-ai">
             <span>🎩</span>
           </div>
         }
@@ -48,7 +48,7 @@
           </div>
         </div>
         @if (message.sender === 'user') {
-          <div class="message-avatar user-avatar">
+          <div class="avatar avatar-md avatar-user">
             <span>👤</span>
           </div>
         }
@@ -56,7 +56,7 @@
     }
     @if (isLoading()) {
       <div class="message-wrapper ai-wrapper">
-        <div class="message-avatar ai-avatar">
+        <div class="avatar avatar-md avatar-ai">
           <span>🎩</span>
         </div>
         <div class="message ai-message loading">

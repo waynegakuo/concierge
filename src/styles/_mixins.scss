@@ -1,0 +1,27 @@
+@use 'variables' as *;
+
+// ============================================
+// SCROLLBAR MIXIN
+// ============================================
+
+// Custom scrollbar mixin
+@mixin custom-scrollbar($width: 8px, $track-bg: rgba(0, 0, 0, 0.05), $thumb-bg: rgba($primary, 0.3), $thumb-hover-bg: rgba($primary, 0.5)) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track-bg;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-bg;
+    border-radius: 10px;
+    transition: background $transition-base;
+
+    &:hover {
+      background: $thumb-hover-bg;
+    }
+  }
+}

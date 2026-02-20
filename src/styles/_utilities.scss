@@ -658,3 +658,130 @@
 .bg-transparent {
   background-color: transparent;
 }
+
+// ============================================
+// SCROLLBAR UTILITIES
+// ============================================
+
+// Custom scrollbar mixin
+@mixin custom-scrollbar($width: 8px, $track-bg: rgba(0, 0, 0, 0.05), $thumb-bg: rgba($primary, 0.3), $thumb-hover-bg: rgba($primary, 0.5)) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track-bg;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-bg;
+    border-radius: 10px;
+    transition: background $transition-base;
+
+    &:hover {
+      background: $thumb-hover-bg;
+    }
+  }
+}
+
+.custom-scrollbar {
+  @include custom-scrollbar();
+}
+
+// ============================================
+// AVATAR UTILITIES
+// ============================================
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: $shadow-md;
+  transition: transform $transition-base;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  span {
+    line-height: 1;
+  }
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: $font-size-base;
+}
+
+.avatar-md {
+  width: 40px;
+  height: 40px;
+  font-size: $font-size-xl;
+}
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  font-size: 3rem;
+}
+
+.avatar-user {
+  background: linear-gradient(135deg, $primary-light 0%, $primary 100%);
+}
+
+.avatar-ai {
+  background: linear-gradient(135deg, $white 0%, $gray-100 100%);
+  border: 2px solid rgba($primary, 0.2);
+}
+
+.avatar-welcome {
+  background: linear-gradient(135deg, $white 0%, $gray-100 100%);
+  border: 3px solid rgba($primary, 0.2);
+  box-shadow: $shadow-lg;
+}
+
+// ============================================
+// BACKDROP UTILITIES
+// ============================================
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(10px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(20px);
+}
+
+// ============================================
+// GRADIENT TEXT UTILITIES
+// ============================================
+
+.gradient-text {
+  background: $bg-user-message;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ============================================
+// CARD UTILITIES
+// ============================================
+
+.card {
+  background: rgba($white, 0.8);
+  border-radius: $border-radius;
+  border: 1px solid rgba($primary, 0.1);
+  transition: all $transition-base;
+}
+
+.card-hover-slide {
+  &:hover {
+    transform: translateX(8px);
+    border-color: rgba($primary, 0.3);
+    box-shadow: $shadow-md;
+  }
+}
