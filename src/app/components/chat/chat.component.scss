@@ -12,26 +12,37 @@
   overflow: hidden;
 
   header {
-    padding: $spacing-xl $spacing-lg;
+    padding: $spacing-lg;
     background: rgba(255, 255, 255, 0.95);
     color: $gray-900;
-    text-align: center;
     box-shadow: $shadow-md;
     position: relative;
     z-index: 10;
 
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      max-width: 100%;
+
+      @media screen and (max-width: 767.98px) {
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-md;
+      }
+    }
+
     .branding {
       display: flex;
       align-items: center;
-      gap: $spacing-md;
-      justify-content: center;
+      flex-shrink: 0;
 
       img {
-        height: 90px;
+        height: 60px;
         width: auto;
 
         @media screen and (max-width: 767.98px) {
-          height: 60px;
+          height: 50px;
         }
       }
 
@@ -51,8 +62,13 @@
       font-size: $font-size-sm;
       color: $gray-700;
       line-height: 1.5;
-      max-width: 600px;
-      margin: $spacing-md auto 0;
+      margin: 0;
+      text-align: left;
+      flex: 1;
+
+      @media screen and (max-width: 767.98px) {
+        text-align: center;
+      }
 
       strong {
         color: $gray-900;
@@ -83,7 +99,7 @@
       gap: $spacing-lg;
       max-width: 700px;
       margin: 0 auto;
-      padding: $spacing-2xl;
+      padding: 0 $spacing-2xl;
       animation: fadeIn 0.8s ease-out;
 
       .welcome-avatar {
