@@ -59,22 +59,29 @@ export const _dayTripAgentFlowLogic = ai.defineTool(
   {
     name: 'dayTripAgentFlow',
     description: 'Assists with planning day trips',
-    inputSchema: z.object({input: z.string()}),
-    outputSchema: z.string()
+    inputSchema: z.object({
+      input: z.string(),
+      history: z.array(conversationMessageSchema).optional(),
+    }),
+    outputSchema: z.string(),
   },
-  async ({input}) => {
+  async ({ input, history }) => {
     const response = await ai.generate({
-      prompt: `${DAY_TRIP_AGENT_PROMPT}\n\nUser query: ${input}`,
+      system: DAY_TRIP_AGENT_PROMPT,
+      messages: [
+        ...toGenkitMessages(history ?? []),
+        { role: 'user', content: [{ text: input }] },
+      ],
       config: {
-        googleSearchRetrieval: {}  // Enables real-time web search
-      }
+        googleSearchRetrieval: {}, // Enables real-time web search
+      },
     });
 
-    if (!response.output) {
+    if (!response.text) {
       throw new Error('No output from AI');
     }
 
-    return response.output;
+    return response.text;
   }
 );
 ```
@@ -96,18 +103,25 @@ The concierge agent acts as the orchestrator, deciding which specialized agent(s
 export const _conciergeAgentLogic = ai.defineFlow(
   {
     name: 'conciergeAgentFlow',
-    inputSchema: z.object({input: z.string()}),
-    outputSchema: z.string()
+    inputSchema: z.object({
+      input: z.string(),
+      history: z.array(conversationMessageSchema).optional(),
+    }),
+    outputSchema: z.string(),
   },
-  async ({input}) => {
+  async ({ input, history }) => {
     const response = await ai.generate({
-      prompt: `${CONCIERGE_AGENT_PROMPT}\n\nUser query: ${input}`,
+      system: CONCIERGE_AGENT_PROMPT,
+      messages: [
+        ...toGenkitMessages(history ?? []),
+        { role: 'user', content: [{ text: input }] },
+      ],
       tools: [
-        _dayTripAgentFlowLogic, 
-        _foodieAgentFlowLogic, 
-        _weekendGuideAgentFlowLogic, 
-        _findAndNavigateAgentFlowLogic
-      ]
+        _dayTripAgentFlowLogic,
+        _foodieAgentFlowLogic,
+        _weekendGuideAgentFlowLogic,
+        _findAndNavigateAgentFlowLogic,
+      ],
     });
 
     const result = response.text || response.output;
@@ -188,12 +202,12 @@ The Angular frontend communicates with the multi-agent system through Firebase F
 export class AiService {
   private readonly functions = inject(Functions);
 
-  sendMessage(query: string): Observable<{ data: string }> {
-    const conciergeAgentFlow = httpsCallable<{ input: string }, string>(
-      this.functions, 
+  sendMessage(query: string, history: ConversationMessage[] = []): Observable<{ data: string }> {
+    const conciergeAgentFlow = httpsCallable<{ input: string; history: ConversationMessage[] }, string>(
+      this.functions,
       'conciergeAgentFlow'
     );
-    return from(conciergeAgentFlow({ input: query }));
+    return from(conciergeAgentFlow({ input: query, history }));
   }
 }
 ```
@@ -202,8 +216,29 @@ export class AiService {
 - The service uses Angular's `inject()` function for dependency injection
 - `httpsCallable` creates a typed function that calls the Firebase backend
 - The entire multi-agent orchestration happens server-side
-- The frontend simply sends the user's query and receives the synthesized response
+- The `history` array carries prior conversation turns so agents have full context
 - RxJS observables provide reactive, asynchronous communication
+
+## 💬 Conversation Context
+
+Agents can ask follow-up questions and remember the user's answers across turns. The Angular client maintains the full conversation history in memory and sends it with every request, keeping the backend stateless and scalable.
+
+```typescript
+// ChatComponent — snapshot history before each send
+const historySnapshot = this.conversationHistory();
+this.conversationHistory.update((h) => [...h, { role: 'user', content: query }]);
+
+this.aiService.sendMessage(query, historySnapshot).subscribe({
+  next: (response) => {
+    // Append AI reply so the next turn has full context
+    this.conversationHistory.update((h) => [...h, { role: 'model', content: response.data }]);
+  },
+});
+```
+
+> 📄 For a deep-dive into the design decisions, data flow, and full implementation details, see [documentation/conversation-context.md](documentation/conversation-context.md).
+
+---
 
 ## 🚀 Getting Started
 
@@ -282,7 +317,7 @@ Tools are functions that extend LLM capabilities. Each tool needs:
 Flows orchestrate multiple tools and define complete workflows:
 - Can use multiple tools
 - Handle complex multi-step processes
-- Manage state and context
+- Accept conversation history to maintain context across turns
 
 ### 3. Prompt Engineering
 Effective system prompts are crucial:
@@ -313,6 +348,7 @@ To extend this system with a new agent:
 - [Firebase Genkit Documentation](https://firebase.google.com/docs/genkit)
 - [Angular Documentation](https://angular.dev)
 - [Firebase Functions Documentation](https://firebase.google.com/docs/functions)
+- [Conversation Context Implementation](documentation/conversation-context.md) — how multi-turn context is managed in this project
 
 ## 🛠️ Built With
 

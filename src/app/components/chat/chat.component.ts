@@ -12,19 +12,7 @@ import { AiService } from '../../services/core/ai/ai.service';
 import { finalize } from 'rxjs';
 import { MarkdownUtils } from '../../utils/markdown-utils';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-
-interface Message {
-  text: string;
-  formattedText?: SafeHtml;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
-interface WelcomeCapability {
-  icon: string;
-  title: string;
-  description: string;
-}
+import {ConversationMessage, Message, WelcomeCapability} from '../../models/chat.model';
 
 @Component({
   selector: 'app-chat',
@@ -41,6 +29,7 @@ export class ChatComponent implements AfterViewChecked {
   private shouldScrollToBottom = false;
 
   messages = signal<Message[]>([]);
+  conversationHistory = signal<ConversationMessage[]>([]);
   isLoading = signal(false);
   queryControl = new FormControl('', {
     nonNullable: true,
@@ -91,12 +80,18 @@ export class ChatComponent implements AfterViewChecked {
       { text: query, sender: 'user', timestamp: new Date() },
     ]);
 
+    // Snapshot history before adding the new user message
+    const historySnapshot = this.conversationHistory();
+
+    // Append user turn to history
+    this.conversationHistory.update((h) => [...h, { role: 'user', content: query }]);
+
     this.queryControl.reset();
     this.isLoading.set(true);
     this.shouldScrollToBottom = true;
 
     this.aiService
-      .sendMessage(query)
+      .sendMessage(query, historySnapshot)
       .pipe(
         finalize(() => {
           this.isLoading.set(false);
@@ -114,6 +109,8 @@ export class ChatComponent implements AfterViewChecked {
               timestamp: new Date(),
             },
           ]);
+          // Append AI turn to history
+          this.conversationHistory.update((h) => [...h, { role: 'model', content: response.data }]);
           this.shouldScrollToBottom = true;
         },
         error: (err) => {
