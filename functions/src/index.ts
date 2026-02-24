@@ -11,6 +11,7 @@ import {defineSecret} from 'firebase-functions/params';
 import {enableFirebaseTelemetry} from '@genkit-ai/firebase';
 import {googleAI} from '@genkit-ai/google-genai';
 import {genkit, z} from "genkit";
+import type {MessageData} from '@genkit-ai/ai';
 import {
   CONCIERGE_AGENT_PROMPT,
   DAY_TRIP_AGENT_PROMPT,
@@ -138,26 +139,120 @@ export const _findAndNavigateAgentFlowLogic = ai.defineTool(
   }
 );
 
+const InterruptDataSchema = z.object({
+  toolName: z.string(),
+  toolInput: z.unknown(),
+  metadata: z.unknown().optional(),
+});
+
+const ConciergeInputSchema = z.object({
+  input: z.string(),
+  messages: z.array(z.any()).optional(),
+  interruptResponse: z.object({
+    toolName: z.string(),
+    response: z.string(),
+  }).optional(),
+});
+
+const ConciergeOutputSchema = z.object({
+  text: z.string().optional(),
+  interrupt: InterruptDataSchema.optional(),
+  messages: z.array(z.any()).optional(),
+});
+
 export const _conciergeAgentLogic = ai.defineFlow(
   {
     name: 'conciergeAgentFlow',
-    inputSchema: z.object({input: z.string()}),
-    outputSchema: z.string()
+    inputSchema: ConciergeInputSchema,
+    outputSchema: ConciergeOutputSchema,
   },
-  async ({input}) => {
+  async ({input, messages: prevMessages, interruptResponse}) => {
+    const tools = [
+      _dayTripAgentFlowLogic,
+      _foodieAgentFlowLogic,
+      _weekendGuideAgentFlowLogic,
+      _findAndNavigateAgentFlowLogic,
+    ];
+
+    // If resuming from an interrupt, build resume options
+    if (interruptResponse && prevMessages?.length) {
+      const lastModelMessage = [...prevMessages].reverse().find(
+        (m: MessageData) => m.role === 'model'
+      );
+
+      const interruptPart = lastModelMessage?.content?.find(
+        (p: Record<string, unknown>) =>
+          p.toolRequest &&
+          (p.toolRequest as Record<string, unknown>).name === interruptResponse.toolName &&
+          p.metadata &&
+          (p.metadata as Record<string, unknown>).interrupt
+      );
+
+      if (interruptPart) {
+        const matchingTool = tools.find(
+          (t) => t.__action.name.endsWith(interruptResponse.toolName)
+        );
+
+        if (matchingTool) {
+          const response = await ai.generate({
+            prompt: `${CONCIERGE_AGENT_PROMPT}\n\nUser query: ${input}`,
+            messages: prevMessages as MessageData[],
+            tools,
+            resume: {
+              respond: matchingTool.respond(interruptPart, interruptResponse.response),
+            },
+          });
+
+          if (response.interrupts?.length) {
+            const interrupt = response.interrupts[0];
+            return {
+              interrupt: {
+                toolName: interrupt.toolRequest.name,
+                toolInput: interrupt.toolRequest.input,
+                metadata: interrupt.metadata?.interrupt,
+              },
+              messages: response.messages,
+            };
+          }
+
+          const result = response.text || response.output;
+          return {
+            text: result || undefined,
+            messages: response.messages,
+          };
+        }
+      }
+    }
+
+    // Standard generation
     const response = await ai.generate({
       prompt: `${CONCIERGE_AGENT_PROMPT}\n\nUser query: ${input}`,
-      tools: [_dayTripAgentFlowLogic, _foodieAgentFlowLogic, _weekendGuideAgentFlowLogic, _findAndNavigateAgentFlowLogic]
+      tools,
     });
 
-    // When tools are used, the response may not have output but will have text
+    // Check for interrupts
+    if (response.interrupts?.length) {
+      const interrupt = response.interrupts[0];
+      return {
+        interrupt: {
+          toolName: interrupt.toolRequest.name,
+          toolInput: interrupt.toolRequest.input,
+          metadata: interrupt.metadata?.interrupt,
+        },
+        messages: response.messages,
+      };
+    }
+
     const result = response.text || response.output;
 
     if (!result) {
       throw new Error('No output from AI');
     }
 
-    return result;
+    return {
+      text: result,
+      messages: response.messages,
+    };
   }
 );
 

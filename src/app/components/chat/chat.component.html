@@ -75,9 +75,9 @@
       <input
         type="text"
         [formControl]="queryControl"
-        placeholder="💬 Type your request here..."
+        [placeholder]="pendingInterrupt() ? '📝 Please provide the requested details...' : '💬 Type your request here...'"
         class="form-control"
-        aria-label="Chat message"
+        [attr.aria-label]="pendingInterrupt() ? 'Provide additional details requested by the assistant' : 'Chat message'"
       />
       <button type="submit" class="btn btn-primary" [disabled]="queryControl.invalid || isLoading()">
         <span class="button-content">
