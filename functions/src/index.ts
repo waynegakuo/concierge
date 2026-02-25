@@ -61,9 +61,9 @@ function toGenkitMessages(history: ConversationMessage[]) {
   }));
 }
 
-export const _dayTripAgentFlowLogic = ai.defineTool(
+export const _dayTripAgentToolLogic = ai.defineTool(
   {
-    name: 'dayTripAgentFlow',
+    name: 'dayTripAgentTool',
     description: 'Assists with planning day trips',
     inputSchema: z.object({
       input: z.string(),
@@ -91,9 +91,9 @@ export const _dayTripAgentFlowLogic = ai.defineTool(
   }
 );
 
-export const _foodieAgentFlowLogic = ai.defineTool(
+export const _foodieAgentToolLogic = ai.defineTool(
   {
-    name: 'foodieAgentFlow',
+    name: 'foodieAgentTool',
     description: "Assist with finding the best restaurants based on the user's request",
     inputSchema: z.object({
       input: z.string(),
@@ -121,9 +121,9 @@ export const _foodieAgentFlowLogic = ai.defineTool(
   }
 );
 
-export const _weekendGuideAgentFlowLogic = ai.defineTool(
+export const _weekendGuideAgentToolLogic = ai.defineTool(
   {
-    name: 'weekendGuideAgentFlow',
+    name: 'weekendGuideAgentTool',
     description: 'Assists in finding interesting events, concerts, festivals, and activities happening on a specific weekend',
     inputSchema: z.object({
       input: z.string(),
@@ -151,9 +151,9 @@ export const _weekendGuideAgentFlowLogic = ai.defineTool(
   }
 );
 
-export const _findAndNavigateAgentFlowLogic = ai.defineTool(
+export const _findAndNavigateAgentToolLogic = ai.defineTool(
   {
-    name: 'findAndNavigateAgentFlow',
+    name: 'findAndNavigateAgentTool',
     description: 'Assists with finding the best routes and transportation options',
     inputSchema: z.object({
       input: z.string(),
@@ -198,10 +198,10 @@ export const _conciergeAgentLogic = ai.defineFlow(
         {role: 'user', content: [{text: input}]},
       ],
       tools: [
-        _dayTripAgentFlowLogic,
-        _foodieAgentFlowLogic,
-        _weekendGuideAgentFlowLogic,
-        _findAndNavigateAgentFlowLogic,
+        _dayTripAgentToolLogic,
+        _foodieAgentToolLogic,
+        _weekendGuideAgentToolLogic,
+        _findAndNavigateAgentToolLogic,
       ],
     });
 
