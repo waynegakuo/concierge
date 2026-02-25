@@ -55,9 +55,9 @@ Each specialized agent is defined as a **tool** that the concierge can call. Her
 ```typescript
 // functions/src/index.ts
 
-export const _dayTripAgentFlowLogic = ai.defineTool(
+export const _dayTripAgentToolLogic = ai.defineTool(
   {
-    name: 'dayTripAgentFlow',
+    name: 'dayTripAgentTool',
     description: 'Assists with planning day trips',
     inputSchema: z.object({
       input: z.string(),
@@ -117,10 +117,10 @@ export const _conciergeAgentLogic = ai.defineFlow(
         { role: 'user', content: [{ text: input }] },
       ],
       tools: [
-        _dayTripAgentFlowLogic,
-        _foodieAgentFlowLogic,
-        _weekendGuideAgentFlowLogic,
-        _findAndNavigateAgentFlowLogic,
+        _dayTripAgentToolLogic,
+        _foodieAgentToolLogic,
+        _weekendGuideAgentToolLogic,
+        _findAndNavigateAgentToolLogic,
       ],
     });
 

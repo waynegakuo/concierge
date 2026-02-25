@@ -96,10 +96,10 @@ export const _conciergeAgentLogic = ai.defineFlow(
         { role: 'user', content: [{ text: input }] },
       ],
       tools: [
-        _dayTripAgentFlowLogic,
-        _foodieAgentFlowLogic,
-        _weekendGuideAgentFlowLogic,
-        _findAndNavigateAgentFlowLogic,
+        _dayTripAgentToolLogic,
+        _foodieAgentToolLogic,
+        _weekendGuideAgentToolLogic,
+        _findAndNavigateAgentToolLogic,
       ],
     });
     // ...
@@ -109,12 +109,12 @@ export const _conciergeAgentLogic = ai.defineFlow(
 
 ### 3. Sub-Agent Tools (`functions/src/index.ts`)
 
-Each of the four sub-agent tools (`dayTripAgentFlow`, `foodieAgentFlow`, `weekendGuideAgentFlow`, `findAndNavigateAgentFlow`) also accepts and forwards the `history` array, so they too have full context when generating their responses:
+Each of the four sub-agent tools (`dayTripAgentTool`, `foodieAgentTool`, `weekendGuideAgentTool`, `findAndNavigateAgentTool`) also accepts and forwards the `history` array, so they too have full context when generating their responses:
 
 ```typescript
-export const _dayTripAgentFlowLogic = ai.defineTool(
+export const _dayTripAgentToolLogic = ai.defineTool(
   {
-    name: 'dayTripAgentFlow',
+    name: 'dayTripAgentTool',
     inputSchema: z.object({
       input: z.string(),
       history: z.array(conversationMessageSchema).optional(),
