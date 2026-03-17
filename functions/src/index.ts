@@ -170,6 +170,11 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       ],
       config: {
         googleSearchRetrieval: {},
+        tools: [
+          {
+            googleMaps: {enableWidget: true}
+          }
+        ]
       },
     });
 
