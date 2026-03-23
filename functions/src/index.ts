@@ -171,35 +171,32 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     }),
   },
   async ({input, history}) => {
+    const response = await ai.generate({
+      system: TRANSPORT_AGENT_PROMPT,
+      messages: [
+        ...toGenkitMessages(history ?? []),
+        {role: 'user', content: [{text: input}]},
+      ],
+      config: {
+        googleSearchRetrieval: {},
+        tools: [
+          {
+            googleMaps: {enableWidget: true}
+          }
+        ]
+      },
+    });
 
-    try {
-      const response = await ai.generate({
-        system: TRANSPORT_AGENT_PROMPT,
-        messages: [
-          ...toGenkitMessages(history ?? []),
-          {role: 'user', content: [{text: input}]},
-        ],
-        config: {
-          googleSearchRetrieval: {},
-          tools: [
-            {
-              googleMaps: {enableWidget: true}
-            }
-          ]
-        },
-      });
-
-      const mapsWidgetToken = (response.custom as any)
-        ?.candidates?.[0]
-        ?.groundingMetadata
-        ?.googleMapsWidgetContextToken as string | undefined;
-
-      return {text: response.text, mapsWidgetToken};
+    if (!response.text) {
+      throw new Error('No output from AI');
     }
-    catch (er) {
-      console.error('Error generating response:', er);
-      throw new Error('Failed to generate response');
-    }
+
+    const mapsWidgetToken = (response.custom as any)
+      ?.candidates?.[0]
+      ?.groundingMetadata
+      ?.googleMapsWidgetContextToken as string | undefined;
+
+    return {text: response.text, mapsWidgetToken};
   }
 );
 
