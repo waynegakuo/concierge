@@ -232,9 +232,22 @@ export const _conciergeAgentLogic = ai.defineFlow(
     }
 
     // Extract the maps widget token if the find-and-navigate tool was used
-    const mapsWidgetToken = typeof response.output === 'object' && response.output !== null
-      ? (response.output as any).mapsWidgetToken
-      : undefined;
+    let mapsWidgetToken: string | undefined;
+
+    for (const msg of response.messages) {
+      if (msg.role === 'tool') {
+        for (const part of msg.content) {
+          if (part.toolResponse?.name === 'findAndNavigateAgentTool') {
+            const toolOutput = part.toolResponse.output;
+            if (typeof toolOutput === 'object' && toolOutput !== null) {
+              mapsWidgetToken = (toolOutput as any).mapsWidgetToken;
+              break;
+            }
+          }
+        }
+      }
+      if (mapsWidgetToken) break;
+    }
 
     return {text: resultText, mapsWidgetToken};
   }

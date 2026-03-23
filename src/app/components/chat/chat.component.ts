@@ -143,6 +143,7 @@ export class ChatComponent implements AfterViewChecked {
 
   getMapsWidgetUrl(token: string): SafeResourceUrl {
     const url = `https://www.google.com/maps/embed/v1/directions?widgetContextToken=${encodeURIComponent(token)}`;
+    console.log('Generated Maps Widget URL:', url);
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
