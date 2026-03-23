@@ -194,7 +194,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     const mapsWidgetToken = (response.custom as any)
       ?.candidates?.[0]
       ?.groundingMetadata
-      ?.widgetContextToken as string | undefined;
+      ?.googleMapsWidgetContextToken as string | undefined;
 
     return {text: response.text, mapsWidgetToken, responseObject: response};
   }
