@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {Functions, httpsCallable} from '@angular/fire/functions';
 import {from, Observable} from 'rxjs';
-import {ConversationMessage} from '../../../models/chat.model';
+import {ConversationMessage, ConciergeResponse} from '../../../models/chat.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,8 +10,8 @@ export class AiService {
 
   private readonly functions = inject(Functions);
 
-  sendMessage(query: string, history: ConversationMessage[] = []): Observable<{ data: string }> {
-    const conciergeAgentFlow = httpsCallable<{ input: string; history: ConversationMessage[] }, string>(
+  sendMessage(query: string, history: ConversationMessage[] = []): Observable<{ data: ConciergeResponse }> {
+    const conciergeAgentFlow = httpsCallable<{ input: string; history: ConversationMessage[] }, ConciergeResponse>(
       this.functions,
       'conciergeAgentFlow'
     );

@@ -53,6 +53,12 @@ const conversationMessageSchema = z.object({
 
 type ConversationMessage = z.infer<typeof conversationMessageSchema>;
 
+// Schema for the concierge agent response
+const conciergeResponseSchema = z.object({
+  text: z.string(),
+  mapsWidgetToken: z.string().optional(),
+});
+
 /** Converts client-side history into Genkit MessageData parts. */
 function toGenkitMessages(history: ConversationMessage[]) {
   return history.map((msg) => ({
@@ -159,7 +165,10 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       input: z.string(),
       history: z.array(conversationMessageSchema).optional(),
     }),
-    outputSchema: z.string(),
+    outputSchema: z.object({
+      text: z.string(),
+      mapsWidgetToken: z.string().optional(),
+    }),
   },
   async ({input, history}) => {
     const response = await ai.generate({
@@ -182,7 +191,12 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       throw new Error('No output from AI');
     }
 
-    return response.text;
+    const mapsWidgetToken = (response.custom as any)
+      ?.candidates?.[0]
+      ?.groundingMetadata
+      ?.widgetContextToken as string | undefined;
+
+    return {text: response.text, mapsWidgetToken};
   }
 );
 
@@ -193,7 +207,7 @@ export const _conciergeAgentLogic = ai.defineFlow(
       input: z.string(),
       history: z.array(conversationMessageSchema).optional(),
     }),
-    outputSchema: z.string(),
+    outputSchema: conciergeResponseSchema,
   },
   async ({input, history}) => {
     const response = await ai.generate({
@@ -211,13 +225,18 @@ export const _conciergeAgentLogic = ai.defineFlow(
     });
 
     // When tools are used, the response may not have output but will have text
-    const result = response.text || response.output;
+    const resultText = response.text || (typeof response.output === 'string' ? response.output : response.output?.text);
 
-    if (!result) {
+    if (!resultText) {
       throw new Error('No output from AI');
     }
 
-    return result;
+    // Extract the maps widget token if the find-and-navigate tool was used
+    const mapsWidgetToken = typeof response.output === 'object' && response.output !== null
+      ? (response.output as any).mapsWidgetToken
+      : undefined;
+
+    return {text: resultText, mapsWidgetToken};
   }
 );
 

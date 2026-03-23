@@ -11,6 +11,12 @@ export interface Message {
   formattedText?: SafeHtml;
   sender: 'user' | 'ai';
   timestamp: Date;
+  mapsWidgetToken?: string;
+}
+
+export interface ConciergeResponse {
+  text: string;
+  mapsWidgetToken?: string;
 }
 
 export interface WelcomeCapability {

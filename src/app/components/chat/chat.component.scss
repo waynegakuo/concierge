@@ -256,6 +256,21 @@
         }
       }
 
+      .maps-widget-container {
+        margin-top: $spacing-md;
+        border-radius: $border-radius-lg;
+        overflow: hidden;
+        border: 1px solid rgba($primary, 0.2);
+        box-shadow: $shadow-sm;
+
+        .maps-widget {
+          display: block;
+          width: 100%;
+          height: 320px;
+          border: none;
+        }
+      }
+
       &.loading {
         .message-content {
           color: $primary;

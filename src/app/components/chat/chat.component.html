@@ -43,9 +43,22 @@
         <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
           <div class="message-content">
             @if (message.formattedText) {
+              <p>Maps Token: {{message.mapsWidgetToken}}</p>
               <div [innerHTML]="message.formattedText"></div>
             } @else {
               <span class="message-text">{{ message.text }}</span>
+            }
+            @if (message.mapsWidgetToken) {
+              <div class="maps-widget-container" role="region" aria-label="Google Maps route widget">
+                <iframe
+                  class="maps-widget"
+                  [src]="getMapsWidgetUrl(message.mapsWidgetToken)"
+                  title="Google Maps route"
+                  allowfullscreen
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
             }
           </div>
         </div>
