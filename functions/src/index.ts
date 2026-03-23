@@ -196,7 +196,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       ?.groundingMetadata
       ?.widgetContextToken as string | undefined;
 
-    return {text: response.text, mapsWidgetToken};
+    return {text: response.text, mapsWidgetToken, responseObject: response};
   }
 );
 
@@ -236,7 +236,7 @@ export const _conciergeAgentLogic = ai.defineFlow(
       ? (response.output as any).mapsWidgetToken
       : undefined;
 
-    return {text: resultText, mapsWidgetToken};
+    return {text: resultText, mapsWidgetToken, responseObject: response};
   }
 );
 
