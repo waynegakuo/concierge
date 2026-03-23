@@ -17,7 +17,6 @@ export interface Message {
 export interface ConciergeResponse {
   text: string;
   mapsWidgetToken?: string;
-  responseObject?: any;
 }
 
 export interface WelcomeCapability {
