@@ -187,16 +187,18 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       },
     });
 
-    if (!response.text) {
-      throw new Error('No output from AI');
+    try {
+      const mapsWidgetToken = (response.custom as any)
+        ?.candidates?.[0]
+        ?.groundingMetadata
+        ?.googleMapsWidgetContextToken as string | undefined;
+
+      return {text: response.text, mapsWidgetToken};
     }
-
-    const mapsWidgetToken = (response.custom as any)
-      ?.candidates?.[0]
-      ?.groundingMetadata
-      ?.googleMapsWidgetContextToken as string | undefined;
-
-    return {text: response.text, mapsWidgetToken};
+    catch (er) {
+      console.error('Error generating response:', er);
+      throw new Error('Failed to generate response');
+    }
   }
 );
 
