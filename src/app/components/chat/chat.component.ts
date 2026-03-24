@@ -13,12 +13,13 @@ import { finalize } from 'rxjs';
 import { MarkdownUtils } from '../../utils/markdown-utils';
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import {ConversationMessage, Message, WelcomeCapability} from '../../models/chat.model';
+import {MapsWidget} from '../maps-widget/maps-widget';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MapsWidget],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatComponent implements AfterViewChecked {
