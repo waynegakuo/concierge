@@ -90,7 +90,7 @@ export const _dayTripAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -120,7 +120,7 @@ export const _foodieAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -150,7 +150,7 @@ export const _weekendGuideAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -178,7 +178,6 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
         {role: 'user', content: [{text: input}]},
       ],
       config: {
-        googleSearchRetrieval: {},
         tools: [
           {
             googleMaps: {enableWidget: true}
@@ -188,7 +187,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     const mapsWidgetToken = (response.custom as any)
@@ -228,7 +227,7 @@ export const _conciergeAgentLogic = ai.defineFlow(
     const resultText = response.text || (typeof response.output === 'string' ? response.output : response.output?.text);
 
     if (!resultText) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     // Extract the maps widget token if the find-and-navigate tool was used
