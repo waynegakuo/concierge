@@ -49,6 +49,8 @@ export class MapsWidget implements AfterViewInit {
         // 1. Ensure the 'places' library is loaded to register the custom element
         await google.maps.importLibrary('places');
 
+        // const placeContextualElement = new google.maps.places.PlaceContextualElement({ contextToken: token });
+
         // 2. Create the element using the custom tag name
         // This avoids the "is not a constructor" error
         const placeContextualElement = document.createElement('gmp-place-contextual') as any;
@@ -66,6 +68,7 @@ export class MapsWidget implements AfterViewInit {
         console.log('✅ Contextual Map Element created and appended.');
 
         this.checkIfAppended();
+        this.checkTokenState();
 
       } catch (error) {
         console.error('❌ Error loading Maps library:', error);
@@ -79,4 +82,16 @@ export class MapsWidget implements AfterViewInit {
       console.log('Is map appended?', isAppended);
     }
   }
+
+  checkTokenState() {
+    const currentToken = this.mapElement.nativeElement.contextToken;
+
+    console.log('Check DOM', this.mapElement.nativeElement);
+    if (currentToken) {
+      console.log('Token is active:', currentToken.substring(0, 20) + '...');
+    } else {
+      console.warn('No token assigned to gmp-place-contextual.');
+    }
+  }
+
 }
