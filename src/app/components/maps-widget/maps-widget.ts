@@ -1,14 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, ViewChild, effect, input } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, PLATFORM_ID, ViewChild, effect, inject, input } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { GoogleMapsLoaderService } from '../../services/core/google-maps-loader/google-maps-loader.service';
 
-
-declare const google: {
-  maps: {
-    importLibrary: (library: string) => Promise<unknown>;
-    places: {
-      PlaceContextualElement: new (options: { contextToken: string }) => HTMLElement;
-    };
-  };
-};
 
 @Component({
   selector: 'app-maps-widget',
@@ -19,79 +12,59 @@ declare const google: {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MapsWidget implements AfterViewInit {
-  @ViewChild('mapElement') mapElement!: ElementRef;
+  @ViewChild('mapElement') container!: ElementRef<HTMLElement>;
 
   readonly token = input<string>('');
 
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly mapsLoader = inject(GoogleMapsLoaderService);
   private libraryLoaded = false;
-
-  // Store a reference to the element to update the token later
-  private placeContextualElement?: any;
+  private placeContextualElement: HTMLElement | null = null;
 
   constructor() {
     effect(() => {
       const token = this.token();
-
       if (this.libraryLoaded && token) {
-        this.applyToken(token);
+        this.renderWidget(token);
       }
     });
   }
 
   async ngAfterViewInit() {
-    this.libraryLoaded = true;
-    await this.applyToken(this.token());
-  }
-
-  private async applyToken(token: string) {
-    if (this.mapElement?.nativeElement && token) {
-      try {
-        // 1. Ensure the 'places' library is loaded to register the custom element
-        await google.maps.importLibrary('places');
-
-        // const placeContextualElement = new google.maps.places.PlaceContextualElement({ contextToken: token });
-
-        // 2. Create the element using the custom tag name
-        // This avoids the "is not a constructor" error
-        const placeContextualElement = document.createElement('gmp-place-contextual') as any;
-
-        // 3. Assign properties directly to the element
-        if (token) {
-          placeContextualElement.contextToken = token;
-        }
-        // 4. Append to the Angular-managed DOM element
-        this.mapElement.nativeElement.appendChild(placeContextualElement);
-
-        // Store reference for later updates
-        this.placeContextualElement = placeContextualElement;
-
-        console.log('✅ Contextual Map Element created and appended.');
-
-        this.checkIfAppended();
-        this.checkTokenState();
-
-      } catch (error) {
-        console.error('❌ Error loading Maps library:', error);
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    try {
+      await this.mapsLoader.importLibrary('places');
+      this.libraryLoaded = true;
+      const token = this.token();
+      if (token) {
+        this.renderWidget(token);
       }
+    } catch (err) {
+      console.error('[MapsWidget] Failed to load Maps places library:', err);
     }
   }
 
-  checkIfAppended() {
-    if (this.mapElement && this.placeContextualElement) {
-      const isAppended = this.mapElement.nativeElement.contains(this.placeContextualElement);
-      console.log('Is map appended?', isAppended);
+  private renderWidget(token: string) {
+    if (!this.container?.nativeElement) return;
+
+    // Remove previous element if token changed
+    if (this.placeContextualElement) {
+      this.placeContextualElement.remove();
+      this.placeContextualElement = null;
     }
-  }
 
-  checkTokenState() {
-    const currentToken = this.mapElement.nativeElement.contextToken;
-
-    console.log('Check DOM', this.mapElement.nativeElement);
-    if (currentToken) {
-      console.log('Token is active:', currentToken.substring(0, 20) + '...');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const places = (window as any)['google']?.maps?.places;
+    let el: HTMLElement;
+    if (places?.PlaceContextualElement) {
+      el = new places.PlaceContextualElement({ contextToken: token });
     } else {
-      console.warn('No token assigned to gmp-place-contextual.');
+      el = document.createElement('gmp-place-contextual');
+      (el as HTMLElement & { contextToken: string }).contextToken = token;
     }
+    this.placeContextualElement = el;
+    this.container.nativeElement.appendChild(el);
   }
-
 }
