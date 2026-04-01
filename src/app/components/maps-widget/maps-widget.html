@@ -1,3 +1,9 @@
-<div class="map-wrapper">
-  <div #mapElement style="display: block; height: 500px; width: 100%;"></div>
+<div class="map-wrapper" [class.is-loading]="isLoading()">
+  @if (isLoading()) {
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Loading Map...</p>
+    </div>
+  }
+  <div #mapElement class="map-element" [hidden]="isLoading()"></div>
 </div>

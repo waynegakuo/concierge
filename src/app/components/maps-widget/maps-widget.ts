@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, PLATFORM_ID, ViewChild, effect, inject, input } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, PLATFORM_ID, ViewChild, effect, inject, input, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { GoogleMapsLoaderService } from '../../services/core/google-maps-loader/google-maps-loader.service';
 
@@ -15,6 +15,7 @@ export class MapsWidget implements AfterViewInit {
   @ViewChild('mapElement') container!: ElementRef<HTMLElement>;
 
   readonly token = input<string>('');
+  readonly isLoading = signal(true);
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly mapsLoader = inject(GoogleMapsLoaderService);
@@ -32,6 +33,7 @@ export class MapsWidget implements AfterViewInit {
 
   async ngAfterViewInit() {
     if (!isPlatformBrowser(this.platformId)) {
+      this.isLoading.set(false);
       return;
     }
     try {
@@ -43,6 +45,8 @@ export class MapsWidget implements AfterViewInit {
       }
     } catch (err) {
       console.error('[MapsWidget] Failed to load Maps places library:', err);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 

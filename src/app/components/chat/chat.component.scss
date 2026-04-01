@@ -259,9 +259,15 @@
       .maps-widget-container {
         margin-top: $spacing-md;
         border-radius: $border-radius-lg;
-        overflow: hidden;
         border: 1px solid rgba($primary, 0.2);
         box-shadow: $shadow-sm;
+        overflow: hidden;
+
+        app-maps-widget {
+          display: block;
+          width: 100%;
+          min-height: 320px;
+        }
 
         .maps-widget {
           display: block;
