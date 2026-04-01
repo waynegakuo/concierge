@@ -1,4 +1,4 @@
-<div class="chat-container">
+<div class="chat-container chat-container-layout">
   <header>
     <div class="header-content">
       <div class="branding">
@@ -10,9 +10,9 @@
     </div>
   </header>
 
-  <main #messageList class="message-list" role="log" aria-live="polite">
+  <main #messageList class="message-list chat-message-list" role="log" aria-live="polite">
     @if (messages().length === 0 && !isLoading()) {
-      <div class="welcome-message">
+      <div class="welcome-message chat-welcome-container">
         <div class="avatar avatar-lg avatar-welcome welcome-avatar">
           <span>🎩</span>
         </div>
@@ -34,13 +34,13 @@
       </div>
     }
     @for (message of messages(); track message.timestamp) {
-      <div class="message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
+      <div class="message-wrapper chat-message-wrapper" [class.user-wrapper]="message.sender === 'user'" [class.ai-wrapper]="message.sender === 'ai'">
         @if (message.sender === 'ai') {
           <div class="avatar avatar-md avatar-ai">
             <span>🎩</span>
           </div>
         }
-        <div class="message" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
+        <div class="message chat-message-bubble" [class.user-message]="message.sender === 'user'" [class.ai-message]="message.sender === 'ai'">
           <div class="message-content">
             @if (message.formattedText) {
               <div [innerHTML]="message.formattedText"></div>
@@ -72,11 +72,11 @@
       </div>
     }
     @if (isLoading()) {
-      <div class="message-wrapper ai-wrapper">
+      <div class="message-wrapper chat-message-wrapper ai-wrapper">
         <div class="avatar avatar-md avatar-ai">
           <span>🎩</span>
         </div>
-        <div class="message ai-message loading">
+        <div class="message chat-message-bubble ai-message loading">
           <div class="message-content">
             <span class="message-text">Thinking</span>
           </div>

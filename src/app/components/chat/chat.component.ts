@@ -17,8 +17,9 @@ import {MapsWidget} from '../maps-widget/maps-widget';
 
 @Component({
   selector: 'app-chat',
+  standalone: true,
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss'],
+  styleUrl: './chat.component.scss',
   imports: [ReactiveFormsModule, MapsWidget],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
