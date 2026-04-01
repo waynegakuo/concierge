@@ -18,9 +18,10 @@ import {
   TRANSPORT_AGENT_PROMPT,
   WEEKEND_GUIDE_AGENT_PROMPT,
 } from './system-prompt';
-import {onCallGenkit} from 'firebase-functions/https';
+import {onCall, onCallGenkit} from 'firebase-functions/https';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
+const MAPS_API_KEY = defineSecret('MAPS_API_KEY');
 
 // Detect if the function is running in the Firebase Emulator Suite.
 const isEmulated = process.env.FUNCTIONS_EMULATOR === 'true' || process.env.NODE_ENV === 'development';
@@ -253,3 +254,13 @@ export const _conciergeAgentLogic = ai.defineFlow(
 );
 
 export const conciergeAgentFlow = onCallGenkit(GENKIT_FUNCTION_CONFIG, _conciergeAgentLogic);
+
+export const loadGoogleMaps = onCall(
+  {
+    ...GENKIT_FUNCTION_CONFIG,
+    secrets: [MAPS_API_KEY],
+  },
+  () => {
+    return {key: MAPS_API_KEY.value()};
+  }
+);
