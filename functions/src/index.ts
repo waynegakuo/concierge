@@ -22,6 +22,7 @@ import {onCall, onCallGenkit} from 'firebase-functions/https';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 const MAPS_API_KEY = defineSecret('MAPS_API_KEY');
+const MAPS_API_KEY_DEV = defineSecret('MAPS_API_KEY_DEV');
 
 // Detect if the function is running in the Firebase Emulator Suite.
 const isEmulated = process.env.FUNCTIONS_EMULATOR === 'true' || process.env.NODE_ENV === 'development';
@@ -258,9 +259,18 @@ export const conciergeAgentFlow = onCallGenkit(GENKIT_FUNCTION_CONFIG, _concierg
 export const loadGoogleMaps = onCall(
   {
     ...GENKIT_FUNCTION_CONFIG,
-    secrets: [MAPS_API_KEY],
+    secrets: [MAPS_API_KEY, MAPS_API_KEY_DEV],
   },
-  () => {
+  (request) => {
+    // Determine the environment based on the request origin
+    const origin = request.rawRequest.get('origin') || '';
+    const isPRPreview = /^https:\/\/agents-concierge--pr[a-z0-9-]+\.web\.app$/.test(origin);
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+
+    if (isPRPreview || isLocalhost) {
+      return {key: MAPS_API_KEY_DEV.value()};
+    }
+
     return {key: MAPS_API_KEY.value()};
   }
 );
