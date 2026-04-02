@@ -31,7 +31,7 @@ export class GoogleMapsLoaderService {
             'loadGoogleMaps',
           );
           const { data } = await loadGoogleMaps();
-          setOptions({ key: data.key, v: 'alpha', libraries: ['places'] });
+          setOptions({ key: data.key, v: 'beta', libraries: ['places'] });
           this.initialized = true;
         } catch (error) {
           console.error('Failed to initialize Google Maps via Cloud Function:', error);
