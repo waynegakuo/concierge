@@ -18,9 +18,11 @@ import {
   TRANSPORT_AGENT_PROMPT,
   WEEKEND_GUIDE_AGENT_PROMPT,
 } from './system-prompt';
-import {onCallGenkit} from 'firebase-functions/https';
+import {onCall, onCallGenkit} from 'firebase-functions/https';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
+const MAPS_API_KEY = defineSecret('MAPS_API_KEY');
+const MAPS_API_KEY_DEV = defineSecret('MAPS_API_KEY_DEV');
 
 // Detect if the function is running in the Firebase Emulator Suite.
 const isEmulated = process.env.FUNCTIONS_EMULATOR === 'true' || process.env.NODE_ENV === 'development';
@@ -30,7 +32,7 @@ enableFirebaseTelemetry();
 // Configure Genkit
 const ai = genkit({
   plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY})],
-  model: googleAI.model('gemini-2.5-flash'),
+  model: googleAI.model('gemini-3.1-flash-lite-preview'),
 });
 
 const GENKIT_FUNCTION_CONFIG = {
@@ -52,6 +54,12 @@ const conversationMessageSchema = z.object({
 });
 
 type ConversationMessage = z.infer<typeof conversationMessageSchema>;
+
+// Schema for the concierge agent response
+const conciergeResponseSchema = z.object({
+  text: z.string(),
+  mapsWidgetToken: z.string().optional(),
+});
 
 /** Converts client-side history into Genkit MessageData parts. */
 function toGenkitMessages(history: ConversationMessage[]) {
@@ -84,7 +92,7 @@ export const _dayTripAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -114,7 +122,7 @@ export const _foodieAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -144,7 +152,7 @@ export const _weekendGuideAgentToolLogic = ai.defineTool(
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
     return response.text;
@@ -159,7 +167,10 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       input: z.string(),
       history: z.array(conversationMessageSchema).optional(),
     }),
-    outputSchema: z.string(),
+    outputSchema: z.object({
+      text: z.string(),
+      mapsWidgetToken: z.string().optional(),
+    }),
   },
   async ({input, history}) => {
     const response = await ai.generate({
@@ -169,15 +180,24 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
         {role: 'user', content: [{text: input}]},
       ],
       config: {
-        googleSearchRetrieval: {},
+        tools: [
+          {
+            googleMaps: {enableWidget: true}
+          }
+        ]
       },
     });
 
     if (!response.text) {
-      throw new Error('No output from AI');
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
-    return response.text;
+    const mapsWidgetToken = (response.custom as any)
+      ?.candidates?.[0]
+      ?.groundingMetadata
+      ?.googleMapsWidgetContextToken as string | undefined;
+
+    return {text: response.text, mapsWidgetToken};
   }
 );
 
@@ -188,7 +208,7 @@ export const _conciergeAgentLogic = ai.defineFlow(
       input: z.string(),
       history: z.array(conversationMessageSchema).optional(),
     }),
-    outputSchema: z.string(),
+    outputSchema: conciergeResponseSchema,
   },
   async ({input, history}) => {
     const response = await ai.generate({
@@ -206,14 +226,51 @@ export const _conciergeAgentLogic = ai.defineFlow(
     });
 
     // When tools are used, the response may not have output but will have text
-    const result = response.text || response.output;
+    const resultText = response.text || (typeof response.output === 'string' ? response.output : response.output?.text);
 
-    if (!result) {
-      throw new Error('No output from AI');
+    if (!resultText) {
+      throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
-    return result;
+    // Extract the maps widget token if the find-and-navigate tool was used
+    let mapsWidgetToken: string | undefined;
+
+    for (const msg of response.messages) {
+      if (msg.role === 'tool') {
+        for (const part of msg.content) {
+          if (part.toolResponse?.name === 'findAndNavigateAgentTool') {
+            const toolOutput = part.toolResponse.output;
+            if (typeof toolOutput === 'object' && toolOutput !== null) {
+              mapsWidgetToken = (toolOutput as any).mapsWidgetToken;
+              break;
+            }
+          }
+        }
+      }
+      if (mapsWidgetToken) break;
+    }
+
+    return {text: resultText, mapsWidgetToken};
   }
 );
 
 export const conciergeAgentFlow = onCallGenkit(GENKIT_FUNCTION_CONFIG, _conciergeAgentLogic);
+
+export const loadGoogleMaps = onCall(
+  {
+    ...GENKIT_FUNCTION_CONFIG,
+    secrets: [MAPS_API_KEY, MAPS_API_KEY_DEV],
+  },
+  (request) => {
+    // Determine the environment based on the request origin
+    const origin = request.rawRequest.get('origin') || '';
+    const isPRPreview = /^https:\/\/agents-concierge--pr[a-z0-9-]+\.web\.app$/.test(origin);
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+
+    if (isPRPreview || isLocalhost) {
+      return {key: MAPS_API_KEY_DEV.value()};
+    }
+
+    return {key: MAPS_API_KEY.value()};
+  }
+);
