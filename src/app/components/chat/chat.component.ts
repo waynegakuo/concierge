@@ -11,7 +11,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AiService } from '../../services/core/ai/ai.service';
 import { finalize } from 'rxjs';
 import { MarkdownUtils } from '../../utils/markdown-utils';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {ConversationMessage, Message, WelcomeCapability} from '../../models/chat.model';
 import {MapsWidget} from '../maps-widget/maps-widget';
 
@@ -102,7 +102,7 @@ export class ChatComponent implements AfterViewChecked {
       )
       .subscribe({
         next: (response) => {
-          const { text, mapsWidgetToken } = response.data;
+          const { text, mapsPlaces } = response.data;
           this.messages.update((msgs) => [
             ...msgs,
             {
@@ -110,7 +110,7 @@ export class ChatComponent implements AfterViewChecked {
               formattedText: this.formatMarkdown(text),
               sender: 'ai',
               timestamp: new Date(),
-              mapsWidgetToken,
+              mapsPlaces,
             },
           ]);
           // Append AI turn to history
@@ -141,12 +141,6 @@ export class ChatComponent implements AfterViewChecked {
         behavior: 'smooth',
       });
     }
-  }
-
-  getMapsWidgetUrl(token: string): SafeResourceUrl {
-    const url = `https://www.google.com/maps/embed/v1/directions?widgetContextToken=${encodeURIComponent(token)}`;
-    console.log('Generated Maps Widget URL:', url);
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   private formatMarkdown(text: string): SafeHtml {

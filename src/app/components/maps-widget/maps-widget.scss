@@ -1,18 +1,15 @@
 .map-wrapper {
   position: relative;
   width: 100%;
-  height: 500px;
-  max-height: 80vh;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
   background: #f8f9fa;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 
   &.is-loading {
-    height: 300px; // Smaller height while loading if preferred, or keep same
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -44,12 +41,50 @@
   100% { transform: rotate(360deg); }
 }
 
-.map-element {
-  display: block;
-  width: 100%;
-  height: 100%;
+.map-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
   &[hidden] {
     display: none;
+  }
+}
+
+.map-element {
+  display: block;
+  width: 100%;
+  height: 280px;
+}
+
+.place-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.place-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+gmp-place-details-compact {
+  width: 100%;
+}
+
+.place-source {
+  font-size: 13px;
+  color: #1967d2;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
   }
 }

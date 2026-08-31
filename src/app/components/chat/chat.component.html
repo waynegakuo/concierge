@@ -47,19 +47,9 @@
             } @else {
               <span class="message-text">{{ message.text }}</span>
             }
-            @if (message.mapsWidgetToken) {
-              <div class="maps-widget-container" role="region" aria-label="Google Maps route widget">
-<!--                <iframe-->
-<!--                  class="maps-widget"-->
-<!--                  [src]="getMapsWidgetUrl(message.mapsWidgetToken)"-->
-<!--                  title="Google Maps route"-->
-<!--                  allowfullscreen-->
-<!--                  loading="lazy"-->
-<!--                  referrerpolicy="no-referrer-when-downgrade"-->
-<!--                ></iframe>-->
-
-                <app-maps-widget [token]="message.mapsWidgetToken"></app-maps-widget>
-
+            @if (message.mapsPlaces?.length) {
+              <div class="maps-widget-container" role="region" aria-label="Google Maps grounded places">
+                <app-maps-widget [places]="message.mapsPlaces ?? []"></app-maps-widget>
               </div>
             }
           </div>
