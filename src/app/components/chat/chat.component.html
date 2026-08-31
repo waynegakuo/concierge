@@ -47,9 +47,16 @@
             } @else {
               <span class="message-text">{{ message.text }}</span>
             }
-            @if (message.mapsPlaces?.length) {
-              <div class="maps-widget-container" role="region" aria-label="Google Maps grounded places">
-                <app-maps-widget [places]="message.mapsPlaces ?? []"></app-maps-widget>
+            @if (message.mapsPlaces?.length || message.mapsRoute) {
+              <div
+                class="maps-widget-container"
+                role="region"
+                [attr.aria-label]="message.mapsRoute ? 'Google Maps directions' : 'Google Maps grounded places'"
+              >
+                <app-maps-widget
+                  [places]="message.mapsPlaces ?? []"
+                  [route]="message.mapsRoute"
+                ></app-maps-widget>
               </div>
             }
           </div>

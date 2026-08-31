@@ -21,6 +21,7 @@ describe('MapsWidget', () => {
 
     fixture = TestBed.createComponent(MapsWidget);
     fixture.componentRef.setInput('places', []);
+    fixture.componentRef.setInput('route', undefined);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
