@@ -5,18 +5,23 @@ export interface ConversationMessage {
   content: string;
 }
 
+export interface MapsPlace {
+  placeId: string;
+  title?: string;
+  uri?: string;
+}
 
 export interface Message {
   text: string;
   formattedText?: SafeHtml;
   sender: 'user' | 'ai';
   timestamp: Date;
-  mapsWidgetToken?: string;
+  mapsPlaces?: MapsPlace[];
 }
 
 export interface ConciergeResponse {
   text: string;
-  mapsWidgetToken?: string;
+  mapsPlaces?: MapsPlace[];
 }
 
 export interface WelcomeCapability {

@@ -5,5 +5,35 @@
       <p>Loading Map...</p>
     </div>
   }
-  <div #mapElement class="map-element" [hidden]="isLoading()"></div>
+  <div class="map-body" [hidden]="isLoading()">
+    <div #mapElement class="map-element" role="img" aria-label="Map of grounded Google Maps places"></div>
+    @if (librariesReady() && places().length) {
+      <ul class="place-list">
+        @for (place of places(); track place.placeId) {
+          <li class="place-item">
+            <gmp-place-details-compact orientation="horizontal" truncation-preferred>
+              <gmp-place-details-place-request [attr.place]="place.placeId"></gmp-place-details-place-request>
+              <gmp-place-content-config>
+                <gmp-place-media lightbox-preferred></gmp-place-media>
+                <gmp-place-rating></gmp-place-rating>
+                <gmp-place-type></gmp-place-type>
+                <gmp-place-open-now-status></gmp-place-open-now-status>
+                <gmp-place-attribution></gmp-place-attribution>
+              </gmp-place-content-config>
+            </gmp-place-details-compact>
+            @if (place.uri) {
+              <a
+                class="place-source"
+                [href]="place.uri"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View {{ place.title || 'this place' }} on Google Maps
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
 </div>

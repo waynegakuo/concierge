@@ -55,10 +55,18 @@ const conversationMessageSchema = z.object({
 
 type ConversationMessage = z.infer<typeof conversationMessageSchema>;
 
+const mapsPlaceSchema = z.object({
+  placeId: z.string(),
+  title: z.string().optional(),
+  uri: z.string().optional(),
+});
+
+type MapsPlace = z.infer<typeof mapsPlaceSchema>;
+
 // Schema for the concierge agent response
 const conciergeResponseSchema = z.object({
   text: z.string(),
-  mapsWidgetToken: z.string().optional(),
+  mapsPlaces: z.array(mapsPlaceSchema).optional(),
 });
 
 /** Converts client-side history into Genkit MessageData parts. */
@@ -67,6 +75,74 @@ function toGenkitMessages(history: ConversationMessage[]) {
     role: msg.role as 'user' | 'model',
     content: [{text: msg.content}],
   }));
+}
+
+function normalizePlaceId(placeId: string): string {
+  return placeId.replace(/^places\//, '');
+}
+
+function coerceRecord(value: unknown): Record<string, unknown> | undefined {
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object'
+        ? (parsed as Record<string, unknown>)
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (value && typeof value === 'object') {
+    return value as Record<string, unknown>;
+  }
+  return undefined;
+}
+
+type GeminiGroundingPayload = {
+  candidates?: Array<{
+    groundingMetadata?: {
+      groundingChunks?: Array<{
+        maps?: {placeId?: string; title?: string; uri?: string};
+      }>;
+    };
+  }>;
+};
+
+/** Reads Maps grounding sources from the raw Gemini payload. Widget tokens are no longer returned. */
+function extractMapsPlacesFromResponse(response: {raw?: unknown; custom?: unknown}): MapsPlace[] {
+  const rawPayload = response.raw as GeminiGroundingPayload | undefined;
+  const customPayload = response.custom as GeminiGroundingPayload | undefined;
+  const chunks =
+    rawPayload?.candidates?.[0]?.groundingMetadata?.groundingChunks ??
+    customPayload?.candidates?.[0]?.groundingMetadata?.groundingChunks ??
+    [];
+  const places: MapsPlace[] = [];
+  const seen = new Set<string>();
+
+  for (const chunk of chunks) {
+    const maps = chunk?.maps;
+    if (!maps?.placeId) continue;
+    const placeId = normalizePlaceId(String(maps.placeId));
+    if (!placeId || seen.has(placeId)) continue;
+    seen.add(placeId);
+    places.push({
+      placeId,
+      title: maps.title,
+      uri: maps.uri,
+    });
+  }
+
+  return places;
+}
+
+function mapsPlacesFromToolOutput(output: unknown): MapsPlace[] | undefined {
+  const record = coerceRecord(output);
+  if (!record) return undefined;
+
+  const nested = coerceRecord(record.content);
+  const candidate = record.mapsPlaces ?? nested?.mapsPlaces;
+  if (!Array.isArray(candidate) || candidate.length === 0) return undefined;
+  return candidate as MapsPlace[];
 }
 
 export const _dayTripAgentToolLogic = ai.defineTool(
@@ -169,7 +245,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     }),
     outputSchema: z.object({
       text: z.string(),
-      mapsWidgetToken: z.string().optional(),
+      mapsPlaces: z.array(mapsPlaceSchema).optional(),
     }),
   },
   async ({input, history}) => {
@@ -180,11 +256,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
         {role: 'user', content: [{text: input}]},
       ],
       config: {
-        tools: [
-          {
-            googleMaps: {enableWidget: true}
-          }
-        ]
+        tools: [{googleMaps: {}}],
       },
     });
 
@@ -192,12 +264,12 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
       throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
-    const mapsWidgetToken = (response.custom as any)
-      ?.candidates?.[0]
-      ?.groundingMetadata
-      ?.googleMapsWidgetContextToken as string | undefined;
+    const mapsPlaces = extractMapsPlacesFromResponse(response);
 
-    return {text: response.text, mapsWidgetToken};
+    return {
+      text: response.text,
+      mapsPlaces: mapsPlaces.length ? mapsPlaces : undefined,
+    };
   }
 );
 
@@ -232,25 +304,22 @@ export const _conciergeAgentLogic = ai.defineFlow(
       throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
-    // Extract the maps widget token if the find-and-navigate tool was used
-    let mapsWidgetToken: string | undefined;
+    // Extract Maps grounding places if the find-and-navigate tool was used
+    let mapsPlaces: MapsPlace[] | undefined;
 
     for (const msg of response.messages) {
       if (msg.role === 'tool') {
         for (const part of msg.content) {
           if (part.toolResponse?.name === 'findAndNavigateAgentTool') {
-            const toolOutput = part.toolResponse.output;
-            if (typeof toolOutput === 'object' && toolOutput !== null) {
-              mapsWidgetToken = (toolOutput as any).mapsWidgetToken;
-              break;
-            }
+            mapsPlaces = mapsPlacesFromToolOutput(part.toolResponse.output);
+            if (mapsPlaces) break;
           }
         }
       }
-      if (mapsWidgetToken) break;
+      if (mapsPlaces) break;
     }
 
-    return {text: resultText, mapsWidgetToken};
+    return {text: resultText, mapsPlaces};
   }
 );
 
