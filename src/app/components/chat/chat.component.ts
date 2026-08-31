@@ -102,7 +102,7 @@ export class ChatComponent implements AfterViewChecked {
       )
       .subscribe({
         next: (response) => {
-          const { text, mapsPlaces } = response.data;
+          const { text, mapsPlaces, mapsRoute } = response.data;
           this.messages.update((msgs) => [
             ...msgs,
             {
@@ -111,6 +111,7 @@ export class ChatComponent implements AfterViewChecked {
               sender: 'ai',
               timestamp: new Date(),
               mapsPlaces,
+              mapsRoute,
             },
           ]);
           // Append AI turn to history

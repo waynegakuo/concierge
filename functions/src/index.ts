@@ -61,12 +61,24 @@ const mapsPlaceSchema = z.object({
   uri: z.string().optional(),
 });
 
+const mapsTravelModeSchema = z.enum(['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT']);
+
+const mapsRouteSchema = z.object({
+  originPlaceId: z.string(),
+  destinationPlaceId: z.string(),
+  originTitle: z.string().optional(),
+  destinationTitle: z.string().optional(),
+  travelMode: mapsTravelModeSchema.optional(),
+});
+
 type MapsPlace = z.infer<typeof mapsPlaceSchema>;
+type MapsRoute = z.infer<typeof mapsRouteSchema>;
 
 // Schema for the concierge agent response
 const conciergeResponseSchema = z.object({
   text: z.string(),
   mapsPlaces: z.array(mapsPlaceSchema).optional(),
+  mapsRoute: mapsRouteSchema.optional(),
 });
 
 /** Converts client-side history into Genkit MessageData parts. */
@@ -135,14 +147,154 @@ function extractMapsPlacesFromResponse(response: {raw?: unknown; custom?: unknow
   return places;
 }
 
-function mapsPlacesFromToolOutput(output: unknown): MapsPlace[] | undefined {
+function navigateToolPayload(output: unknown): {
+  mapsPlaces?: MapsPlace[];
+  mapsRoute?: MapsRoute;
+} | undefined {
   const record = coerceRecord(output);
   if (!record) return undefined;
 
   const nested = coerceRecord(record.content);
-  const candidate = record.mapsPlaces ?? nested?.mapsPlaces;
-  if (!Array.isArray(candidate) || candidate.length === 0) return undefined;
-  return candidate as MapsPlace[];
+  const mapsPlaces = record.mapsPlaces ?? nested?.mapsPlaces;
+  const mapsRoute = record.mapsRoute ?? nested?.mapsRoute;
+  const places = Array.isArray(mapsPlaces) && mapsPlaces.length
+    ? (mapsPlaces as MapsPlace[])
+    : undefined;
+  const route =
+    mapsRoute && typeof mapsRoute === 'object'
+      ? (mapsRoute as MapsRoute)
+      : undefined;
+
+  if (!places && !route) return undefined;
+  return {mapsPlaces: places, mapsRoute: route};
+}
+
+function looksLikeDirectionsQuery(input: string): boolean {
+  return (
+    /\b(how (do|can|to) (i |we )?(get|go|reach)|directions?|route|navigate|way to|take me)\b/i.test(
+      input
+    ) ||
+    /\bfrom\b.+\b(to|from)\b/i.test(input) ||
+    /\bto get (to|from)\b/i.test(input)
+  );
+}
+
+function inferTravelMode(
+  input: string
+): z.infer<typeof mapsTravelModeSchema> {
+  if (/\b(walk|walking|on foot|pedestrian)\b/i.test(input)) return 'WALKING';
+  if (/\b(bike|biking|cycling|bicycle|boda)\b/i.test(input)) return 'BICYCLING';
+  if (/\b(transit|bus|train|subway|matatu)\b/i.test(input)) {
+    return 'TRANSIT';
+  }
+  return 'DRIVING';
+}
+
+function findPlaceByQuery(query: string, places: MapsPlace[]): MapsPlace | undefined {
+  const normalized = query.toLowerCase().replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+  if (!normalized) return undefined;
+
+  let best: {place: MapsPlace; score: number} | undefined;
+  for (const place of places) {
+    const title = (place.title ?? '').toLowerCase();
+    if (!title) continue;
+    let score = 0;
+    if (title.includes(normalized) || normalized.includes(title)) score += 4;
+    const words = normalized.split(/\s+/).filter((word) => word.length > 2);
+    score += words.filter((word) => title.includes(word)).length;
+    if (!best || score > best.score) {
+      best = {place, score};
+    }
+  }
+  return best && best.score >= 2 ? best.place : undefined;
+}
+
+function inferRouteFromQuery(input: string, places: MapsPlace[]): MapsRoute | undefined {
+  const toMatch = input.match(/\bto\s+(.+?)(?:\s+from\s+|$)/i);
+  const fromMatches = [...input.matchAll(/\bfrom\s+(.+?)(?=\s+from\s+|\s+to\s+|$)/gi)];
+
+  let origin: MapsPlace | undefined;
+  let destination: MapsPlace | undefined;
+
+  if (fromMatches.length === 1 && toMatch) {
+    origin = findPlaceByQuery(fromMatches[0][1], places);
+    destination = findPlaceByQuery(toMatch[1], places);
+  } else if (fromMatches.length >= 2) {
+    origin = findPlaceByQuery(fromMatches[fromMatches.length - 1][1], places);
+    destination = findPlaceByQuery(fromMatches[0][1], places);
+  }
+
+  if (!origin || !destination || origin.placeId === destination.placeId) {
+    return undefined;
+  }
+
+  return {
+    originPlaceId: origin.placeId,
+    destinationPlaceId: destination.placeId,
+    originTitle: origin.title,
+    destinationTitle: destination.title,
+    travelMode: inferTravelMode(input),
+  };
+}
+
+async function resolveMapsRoute(
+  input: string,
+  places: MapsPlace[]
+): Promise<MapsRoute | undefined> {
+  if (places.length < 2 || !looksLikeDirectionsQuery(input)) {
+    return undefined;
+  }
+
+  const heuristic = inferRouteFromQuery(input, places);
+  if (heuristic) return heuristic;
+
+  const ids = places.map((place) => place.placeId);
+  const idSchema = z.enum(ids as [string, ...string[]]);
+
+  try {
+    const pick = await ai.generate({
+      prompt: `The user asked for directions: "${input}"
+
+Grounded Google Maps places:
+${places.map((place) => `- ${place.placeId}: ${place.title ?? 'Unknown place'}`).join('\n')}
+
+Pick the origin and destination place IDs from that list only.
+If the user said "from A to B", A is origin and B is destination.
+If they used two "from" phrases (e.g. "to Second Cup from Kongowea"), treat the neighborhood or area as origin and the specific business as destination.`,
+      output: {
+        schema: z.object({
+          originPlaceId: idSchema,
+          destinationPlaceId: idSchema,
+        }),
+      },
+    });
+
+    const originPlaceId = pick.output?.originPlaceId;
+    const destinationPlaceId = pick.output?.destinationPlaceId;
+    if (!originPlaceId || !destinationPlaceId || originPlaceId === destinationPlaceId) {
+      return undefined;
+    }
+
+    const origin = places.find((place) => place.placeId === originPlaceId);
+    const destination = places.find((place) => place.placeId === destinationPlaceId);
+
+    return {
+      originPlaceId,
+      destinationPlaceId,
+      originTitle: origin?.title,
+      destinationTitle: destination?.title,
+      travelMode: inferTravelMode(input),
+    };
+  } catch (error) {
+    console.warn('Failed to infer maps route from places:', error);
+    return {
+      originPlaceId: places[0].placeId,
+      destinationPlaceId: places[places.length - 1].placeId,
+      originTitle: places[0].title,
+      destinationTitle: places[places.length - 1].title,
+      travelMode: inferTravelMode(input),
+    };
+  }
 }
 
 export const _dayTripAgentToolLogic = ai.defineTool(
@@ -246,6 +398,7 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     outputSchema: z.object({
       text: z.string(),
       mapsPlaces: z.array(mapsPlaceSchema).optional(),
+      mapsRoute: mapsRouteSchema.optional(),
     }),
   },
   async ({input, history}) => {
@@ -265,10 +418,12 @@ export const _findAndNavigateAgentToolLogic = ai.defineTool(
     }
 
     const mapsPlaces = extractMapsPlacesFromResponse(response);
+    const mapsRoute = await resolveMapsRoute(input, mapsPlaces);
 
     return {
       text: response.text,
       mapsPlaces: mapsPlaces.length ? mapsPlaces : undefined,
+      mapsRoute,
     };
   }
 );
@@ -304,22 +459,25 @@ export const _conciergeAgentLogic = ai.defineFlow(
       throw new Error(`No output from AI. Finish reason: ${response.finishReason}, message: ${response.finishMessage}`);
     }
 
-    // Extract Maps grounding places if the find-and-navigate tool was used
+    // Extract Maps grounding data if the find-and-navigate tool was used
     let mapsPlaces: MapsPlace[] | undefined;
+    let mapsRoute: MapsRoute | undefined;
 
     for (const msg of response.messages) {
       if (msg.role === 'tool') {
         for (const part of msg.content) {
           if (part.toolResponse?.name === 'findAndNavigateAgentTool') {
-            mapsPlaces = mapsPlacesFromToolOutput(part.toolResponse.output);
-            if (mapsPlaces) break;
+            const payload = navigateToolPayload(part.toolResponse.output);
+            mapsPlaces = payload?.mapsPlaces;
+            mapsRoute = payload?.mapsRoute;
+            if (mapsPlaces || mapsRoute) break;
           }
         }
       }
-      if (mapsPlaces) break;
+      if (mapsPlaces || mapsRoute) break;
     }
 
-    return {text: resultText, mapsPlaces};
+    return {text: resultText, mapsPlaces, mapsRoute};
   }
 );
 

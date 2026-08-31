@@ -1,4 +1,4 @@
-<div class="map-wrapper" [class.is-loading]="isLoading()">
+<div class="map-wrapper" [class.is-loading]="isLoading()" [class.has-directions]="!!route()">
   @if (isLoading()) {
     <div class="loading-overlay">
       <div class="spinner"></div>
@@ -6,8 +6,50 @@
     </div>
   }
   <div class="map-body" [hidden]="isLoading()">
-    <div #mapElement class="map-element" role="img" aria-label="Map of grounded Google Maps places"></div>
-    @if (librariesReady() && places().length) {
+    @if (route()) {
+      <div class="directions-header">
+        <p class="route-summary">
+          <span class="route-point">{{ route()?.originTitle || 'Origin' }}</span>
+          <span class="route-arrow" aria-hidden="true">→</span>
+          <span class="route-point">{{ route()?.destinationTitle || 'Destination' }}</span>
+        </p>
+        <div class="travel-modes" role="radiogroup" aria-label="Travel mode">
+          @for (mode of travelModes; track mode.id) {
+            <button
+              type="button"
+              class="travel-mode"
+              role="radio"
+              [attr.aria-checked]="selectedTravelMode() === mode.id"
+              [class.active]="selectedTravelMode() === mode.id"
+              (click)="selectTravelMode(mode.id)"
+            >
+              <span aria-hidden="true">{{ mode.icon }}</span>
+              {{ mode.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+    <div
+      #mapElement
+      class="map-element"
+      role="img"
+      [attr.aria-label]="route() ? 'Google Maps directions route' : 'Map of grounded Google Maps places'"
+    ></div>
+    @if (route()) {
+      @if (isRouting()) {
+        <p class="directions-status" role="status">Getting directions…</p>
+      }
+      @if (directionsError()) {
+        <p class="directions-error" role="status">{{ directionsError() }}</p>
+      }
+      <div
+        #directionsPanel
+        class="directions-panel"
+        aria-label="Turn-by-turn directions"
+      ></div>
+    }
+    @if (librariesReady() && places().length && (!route() || !!directionsError())) {
       <ul class="place-list">
         @for (place of places(); track place.placeId) {
           <li class="place-item">

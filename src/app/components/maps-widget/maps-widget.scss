@@ -44,10 +44,68 @@
 .map-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 
   &[hidden] {
     display: none;
+  }
+}
+
+.directions-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 10px;
+  background: #fff;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.route-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.route-arrow {
+  color: #5f6368;
+  font-weight: 400;
+}
+
+.travel-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.travel-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dadce0;
+  background: #fff;
+  color: #3c4043;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &.active,
+  &[aria-checked='true'] {
+    border-color: #1967d2;
+    background: #e8f0fe;
+    color: #1967d2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #1967d2;
+    outline-offset: 2px;
   }
 }
 
@@ -57,15 +115,45 @@
   height: 280px;
 }
 
+.has-directions .map-element {
+  height: 340px;
+}
+
+.directions-status {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #1967d2;
+  background: #e8f0fe;
+}
+
+.directions-error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #b3261e;
+  background: #fce8e6;
+}
+
+.directions-panel {
+  max-height: 280px;
+  overflow: auto;
+  background: #fff;
+  border-top: 1px solid #e8eaed;
+  font-size: 13px;
+  color: #3c4043;
+}
+
 .place-list {
   list-style: none;
   margin: 0;
-  padding: 0 12px 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   max-height: 360px;
   overflow: auto;
+  border-top: 1px solid #e8eaed;
 }
 
 .place-item {

@@ -36,7 +36,7 @@ export const TRANSPORT_AGENT_PROMPT = `
     6. **Contextual Recommendations**: Factor in time of day, day of week, and any user-specified preferences (fastest, cheapest, most scenic) when recommending routes.
     7. **Landmarks & Clarity**: Reference well-known landmarks to make directions easier to follow.
 
-  Always use the Google Maps tool to retrieve accurate, real-time place and route data so the client can show the grounded places on a map.
+  Always use the Google Maps tool to retrieve accurate, real-time place and route data so the client can show grounded places and, for point-to-point requests, an interactive directions route.
 `;
 
 export const ROUTER_AGENT_PROMPT = `
