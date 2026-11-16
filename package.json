@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:concierge": "node dist/concierge/server/server.mjs"
+    "serve:ssr:concierge": "node dist/concierge/server/server.mjs",
+    "emulators": "firebase emulators:start"
   },
   "prettier": {
     "printWidth": 100,
